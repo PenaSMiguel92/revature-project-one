@@ -7,13 +7,20 @@ from custom_exceptions.menu_selection_invalid import MenuSelectionInvalidExcepti
 # from implementation.biostat_handler import BiostatHandler
 from enum import Enum
 
-menu_state = Enum('MENU_STATE', ['INITIAL_STATE',
+menu_state = Enum('MENU_STATE', [
+'INITIAL_STATE',
 'WAITING_STATE',
-'CREATING_PROFILE_STATE',
-'LOADING_PROFILE_STATE',
-'SHOW_HISTORY_STATE',
-'REPORT_BIOSTATS_STATE',
-'CLOSING_STATE'])
+'CREATING_USER_STATE',
+'LOADING_USER_STATE',
+'DELETING_USER_STATE',
+'SETTING_USER_ROLE_STATE',
+'SHOW_ADMINMENU_STATE',
+'SHOWING_USERS_STATE',
+'SHOWING_ORDERS_STATE',
+'CREATE_ORDER_STATE',
+'DELETE_ORDER_STATE',
+'CLOSING_STATE'
+])
 
 class MainMenu(InputValidation, MenuInterface):
     """
@@ -28,8 +35,8 @@ class MainMenu(InputValidation, MenuInterface):
 
     def __init__(self):
         self.current_state = menu_state.INITIAL_STATE
-        self.current_profile = None
-        self.current_biostatHandler = None
+        # self.current_profile = None
+        # self.current_biostatHandler = None
     
     def set_state(self, state_value: int) -> None:
         self.current_state = state_value
@@ -45,12 +52,12 @@ class MainMenu(InputValidation, MenuInterface):
         """
         self.current_state = menu_state.INITIAL_STATE
     
-    def reset_data(self) -> None:
-        self.current_profile = None
-        self.current_biostatHandler = None
+    # def reset_data(self) -> None:
+    #     self.current_profile = None
+    #     self.current_biostatHandler = None
 
     def display_menu(self) -> None:
-        print('\nWelcome to your BGC and BMI Tracker!')
+        print('\nWelcome to RXBuddy!')
         print('What would you like to do?')
         print('(C)reate profile') 
         print('(L)oad profile') 

@@ -1,7 +1,7 @@
-from abc import ABC, abstractmethod
+
 #ABC -> Abstract Base Class
 
-class InputValidation(ABC):
+class InputValidation():
 
     @staticmethod
     def validate_input(input_value: str, **kwargs: any) -> bool:
@@ -13,7 +13,6 @@ class InputValidation(ABC):
             and if char_input, then provide a string containing valid characters as valid_input.
             :return: Returns a boolean value, true if valid input, false if not valid.
         """
-        # try:
         if kwargs.get('char_input') != None:
             return len(input_value) == 1 and input_value in kwargs['valid_input']
         elif kwargs.get('integer_input') != None:
@@ -22,5 +21,3 @@ class InputValidation(ABC):
             return input_value.isalpha() and len(input_value) > 2
         else:
             return False
-        # except KeyError as KE:
-        #     print('')
