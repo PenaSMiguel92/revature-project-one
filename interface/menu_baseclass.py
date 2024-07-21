@@ -12,5 +12,7 @@ class MenuBaseClass(ABC):
     def run(self) -> None:
         """
             This method will execute depending on the current state, and through polymorphism, the functionality will vary.
+            
+            The submenu run methods should return a boolean stating whether the controller is still running.
         """
         pass

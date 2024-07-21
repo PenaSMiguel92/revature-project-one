@@ -1,24 +1,22 @@
-from interface.input_validation import InputValidation
+from interface.input_validation_interface import InputValidation
 from interface.menu_interface import MenuInterface
 from custom_exceptions.menu_selection_invalid import MenuSelectionInvalidException
 # from custom_exceptions.invalid_profile import InvalidProfileException
 # from custom_exceptions.data_missing import DataMissingException
 # from implementation.profile_handler import ProfileHandler
 # from implementation.biostat_handler import BiostatHandler
+
+from implementation.user_controller import UserController
+
 from enum import Enum
 
 menu_state = Enum('MENU_STATE', [
 'INITIAL_STATE',
 'WAITING_STATE',
-'CREATING_USER_STATE',
-'LOADING_USER_STATE',
-'DELETING_USER_STATE',
-'SETTING_USER_ROLE_STATE',
-'SHOW_ADMINMENU_STATE',
-'SHOWING_USERS_STATE',
-'SHOWING_ORDERS_STATE',
-'CREATE_ORDER_STATE',
-'DELETE_ORDER_STATE',
+'USER_SUBMENU_STATE',
+'ADMIN_SUBMENU_STATE',
+'ORDER_SUBMENU_STATE',
+'PRESCRIPTION_SUBMENU_STATE',
 'CLOSING_STATE'
 ])
 
@@ -30,12 +28,13 @@ class MainMenu(InputValidation, MenuInterface):
         
         The default state will be initial_state, and depending on user input the current_state will update accordingly. 
 
-        I can break this logic down further into more classes to follow SOLID principles, but that is beyond the scope of this project.
+        I broke this logic down further into more classes to follow SOLID principles.
     """
 
     def __init__(self):
         self.current_state = menu_state.INITIAL_STATE
-        # self.current_profile = None
+        self.user_controller = None
+        self.current_user = None
         # self.current_biostatHandler = None
     
     def set_state(self, state_value: int) -> None:
@@ -52,35 +51,48 @@ class MainMenu(InputValidation, MenuInterface):
         """
         self.current_state = menu_state.INITIAL_STATE
     
+    def user_submenu(self) -> None:
+        if self.user_controller == None:
+            self.user_controller = UserController()
+        
+        if not self.user_controller.run():
+            self.reset_state()
+
+    def admin_submenu(self) -> None:
+        return super().admin_submenu()
+    
+    def order_submenu(self) -> None:
+        return super().order_submenu()
+    
+    def prescription_submenu(self) -> None:
+        return super().prescription_submenu()
+    
     # def reset_data(self) -> None:
     #     self.current_profile = None
     #     self.current_biostatHandler = None
 
-    def display_menu(self) -> None:
+    def display(self) -> None:
         print('\nWelcome to RXBuddy!')
-        print('What would you like to do?')
-        print('(C)reate profile') 
-        print('(L)oad profile') 
-        print('(S)how history') 
-        print('(R)eport BGC and BMI')
-        print('(K)lose the application') #Mortal Kombat spelling, since C was already taken.
-        user_input = input().upper()
-        if not self.validate_input(user_input, char_input = True, valid_input = 'CLSRK'):
-            raise MenuSelectionInvalidException("Please enter a valid menu option.")
+        print('Please login or register...')
+        self.current_state = menu_state.USER_SUBMENU_STATE
+        # print('(C)lose the application')
+        # user_input = input().upper()
+        # if not self.validate_input(user_input, char_input = True, valid_input = 'CLSRK'):
+        #     raise MenuSelectionInvalidException("Please enter a valid menu option.")
         
-        match user_input:
-            case 'C':
-                self.current_state = menu_state.CREATING_PROFILE_STATE
-            case 'L':
-                self.current_state = menu_state.LOADING_PROFILE_STATE
-            case 'S':
-                self.current_state = menu_state.SHOW_HISTORY_STATE
-            case 'R':
-                self.current_state = menu_state.REPORT_BIOSTATS_STATE
-            case 'K':
-                self.current_state = menu_state.CLOSING_STATE
-            case _:
-                self.current_state = menu_state.INITIAL_STATE
+        # match user_input:
+        #     case 'C':
+        #         self.current_state = menu_state.CREATING_PROFILE_STATE
+        #     case 'L':
+        #         self.current_state = menu_state.LOADING_PROFILE_STATE
+        #     case 'S':
+        #         self.current_state = menu_state.SHOW_HISTORY_STATE
+        #     case 'R':
+        #         self.current_state = menu_state.REPORT_BIOSTATS_STATE
+        #     case 'K':
+        #         self.current_state = menu_state.CLOSING_STATE
+        #     case _:
+        #         self.current_state = menu_state.INITIAL_STATE
     
     def create_profile(self) -> None:
         pass
@@ -132,10 +144,11 @@ class MainMenu(InputValidation, MenuInterface):
         
 
     def run(self) -> None:
-        pass
-        # match self.current_state:
-        #     case menu_state.INITIAL_STATE:
-        #         self.display_menu()
+        match self.current_state:
+            case menu_state.INITIAL_STATE:
+                self.display()
+            case menu_state.USER_SUBMENU_STATE:
+                self.user_submenu()
         #     case menu_state.CREATING_PROFILE_STATE:
         #         self.create_profile()
         #     case menu_state.LOADING_PROFILE_STATE:
