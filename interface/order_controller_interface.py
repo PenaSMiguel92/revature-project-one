@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from interface.menu_baseclass import MenuBaseClass
 
-class OrderControllerInterface(MenuBaseClass):
+class OrderServiceInterface(MenuBaseClass):
     @abstractmethod
     def set_state(self, state_value: int) -> None:
         pass

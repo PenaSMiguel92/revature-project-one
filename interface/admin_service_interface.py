@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from interface.menu_baseclass import MenuBaseClass
 
-class AdminControllerInterface(MenuBaseClass):
+class AdminServiceInterface(MenuBaseClass):
     @abstractmethod
     def set_state(self, state_value: int) -> None:
         """
@@ -17,7 +17,7 @@ class AdminControllerInterface(MenuBaseClass):
         pass
     
     @abstractmethod
-    def display_users(self) -> None:
+    def display_accounts(self) -> None:
         """
             This method will display all users and their roles.
             For example:

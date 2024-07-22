@@ -6,14 +6,14 @@ from custom_exceptions.menu_selection_invalid import MenuSelectionInvalidExcepti
 # from implementation.profile_handler import ProfileHandler
 # from implementation.biostat_handler import BiostatHandler
 
-from implementation.user_controller import UserController
+from implementation.account_service import AccountService
 
 from enum import Enum
 
 menu_state = Enum('MENU_STATE', [
 'INITIAL_STATE',
 'WAITING_STATE',
-'USER_SUBMENU_STATE',
+'ACCOUNT_SUBMENU_STATE',
 'ADMIN_SUBMENU_STATE',
 'ORDER_SUBMENU_STATE',
 'PRESCRIPTION_SUBMENU_STATE',
@@ -33,8 +33,8 @@ class MainMenu(InputValidation, MenuInterface):
 
     def __init__(self):
         self.current_state = menu_state.INITIAL_STATE
-        self.user_controller = None
-        self.current_user = None
+        self.account_service = None
+        self.current_account = None
         # self.current_biostatHandler = None
     
     def set_state(self, state_value: int) -> None:
@@ -51,11 +51,11 @@ class MainMenu(InputValidation, MenuInterface):
         """
         self.current_state = menu_state.INITIAL_STATE
     
-    def user_submenu(self) -> None:
-        if self.user_controller == None:
-            self.user_controller = UserController()
+    def account_submenu(self) -> None:
+        if self.account_service == None:
+            self.account_service = AccountService()
         
-        if not self.user_controller.run():
+        if not self.account_service.run():
             self.reset_state()
 
     def admin_submenu(self) -> None:
@@ -74,7 +74,7 @@ class MainMenu(InputValidation, MenuInterface):
     def display(self) -> None:
         print('\nWelcome to RXBuddy!')
         print('Please login or register...')
-        self.current_state = menu_state.USER_SUBMENU_STATE
+        self.current_state = menu_state.ACCOUNT_SUBMENU_STATE
         # print('(C)lose the application')
         # user_input = input().upper()
         # if not self.validate_input(user_input, char_input = True, valid_input = 'CLSRK'):
@@ -147,8 +147,8 @@ class MainMenu(InputValidation, MenuInterface):
         match self.current_state:
             case menu_state.INITIAL_STATE:
                 self.display()
-            case menu_state.USER_SUBMENU_STATE:
-                self.user_submenu()
+            case menu_state.ACCOUNT_SUBMENU_STATE:
+                self.account_submenu()
         #     case menu_state.CREATING_PROFILE_STATE:
         #         self.create_profile()
         #     case menu_state.LOADING_PROFILE_STATE:

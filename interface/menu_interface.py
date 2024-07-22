@@ -23,7 +23,7 @@ class MenuInterface(MenuBaseClass):
         pass
 
     @abstractmethod
-    def user_submenu(self) -> None:
+    def account_submenu(self) -> None:
         """
             Relay responsibility of handling user creation and login to another class.
         """
