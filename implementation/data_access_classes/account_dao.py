@@ -1,7 +1,6 @@
-from mysql.connector import MySQLConnection
+from interface.data_access_object_interface import DataAccessObjectInterface
 
-class AccountDAO():
+class AccountDAO(DataAccessObjectInterface):
     def __init__(self):
-        self.connection = MySQLConnection(user='root', password='Revature-RootSQL-92',
-                              host='127.0.0.1', 
-                              database='myfirstdb')
+        self.accounts = []
+             

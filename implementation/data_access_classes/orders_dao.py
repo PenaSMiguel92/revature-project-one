@@ -1,9 +1,6 @@
-from mysql.connector import MySQLConnection
+from interface.data_access_object_interface import DataAccessObjectInterface
 
-class OrdersDAO():
+class OrdersDAO(DataAccessObjectInterface):
     def __init__(self):
-        #Make sure to load user and password from a file that is not uploaded to github!
-        self.connection = MySQLConnection(user='root', password='Revature-RootSQL-92',
-                              host='127.0.0.1', 
-                              database='myfirstdb')
+        self.orders = []
         
