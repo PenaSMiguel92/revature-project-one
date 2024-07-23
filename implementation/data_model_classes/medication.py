@@ -1,5 +1,8 @@
+from dataclasses import dataclass
+
+@dataclass
 class Medication():
-    def __init__(self, med_id, med_price, med_name):
-        self.med_id = med_id
-        self.med_price = med_price
-        self.med_name = med_name
+    medication_id: int
+    medication_price: float
+    medication_name: str
+    medication_description: str
