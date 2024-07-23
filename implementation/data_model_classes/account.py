@@ -1,5 +1,13 @@
+from dataclasses import dataclass
+
+@dataclass
 class Account():
-    def __init__(self, **kwargs):
-        self.username = kwargs['username']
-        self.password = kwargs['password']
-        self.role = kwargs['role']
+    """
+        Class for keeping track of account data
+    """
+    account_id: int
+    first_name: str
+    last_name: str
+    username: str
+    password: str
+    role_id: int

@@ -3,8 +3,14 @@
 The current system is messy and errors can occur.
 A store where Patients can login, see their prescriptions, buy refills, and see a history of their purchased prescriptions.
 
+## Note:
+    - The entire project is inside a virtual environment folder called project-one. 
+    - config/ directory needs to be created with a .csv file inside with the following data:
+        - user, password, host, and database values in quotes. 
+    - This is primarily meant as a security feature, but can be easily overided by hard coding the values.
+    - The config/ folder was added to the .gitignore file, so that sensitive information isn't uploaded to github.
 
-Features:
+## Features:
     - Focus on CLI, but once core features are implemented -> tkinter GUI
     - Doctors can login, prescribe a medication to a patient, and see the medication details.
     - Admin can see all orders and users, add/update/remove medications, removing/editing of users, apply/drop doctor role to users. 
@@ -23,13 +29,12 @@ Features:
 
 ## Tech Stack:
     Python 3.12.4
-        - mysql.connector or pymongo (compare and constrast, which one makes more sense?)
+        - dataclasses module for making a codebase similar to Java when working with databases.
+        - mysql.connector for connecting to mysql database.
         - tkinter (GUI library, can be implemented later, focus on CLI)
     VS Code
-    MySQL / MongoDB
-        - Four tables/collections, JOIN or Embedded documents.
-        - MongoDB has nicer syntax for importing json files / dictionaries
+    MySQL
+        - Four tables/collections -> JOIN queries necessary.
         - MySQL has nicer syntax for joining multiple tables.
         - MySQL has stricter rules -> less likely to be buggy.
-        - JSON is used everywhere, good to know well, and MongoDB provides this path.
     Git

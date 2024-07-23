@@ -38,3 +38,4 @@ class DataAccessObjectInterface(ABC):
 
         return class_pointer.current_connection        
 
+    
