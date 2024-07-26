@@ -6,7 +6,8 @@ from custom_exceptions.menu_selection_invalid import MenuSelectionInvalidExcepti
 # from implementation.profile_handler import ProfileHandler
 # from implementation.biostat_handler import BiostatHandler
 
-from implementation.account_service import AccountService
+from implementation.service_classes.account_service import AccountService
+from implementation.service_classes.account_service import account_service_state
 
 from enum import Enum
 
@@ -15,8 +16,8 @@ menu_state = Enum('MENU_STATE', [
 'WAITING_STATE',
 'ACCOUNT_SUBMENU_STATE',
 'ADMIN_SUBMENU_STATE',
-'ORDER_SUBMENU_STATE',
-'PRESCRIPTION_SUBMENU_STATE',
+'PATIENT_SUBMENU_STATE',
+'DOCTOR_SUBMENU_STATE',
 'CLOSING_STATE'
 ])
 
@@ -34,7 +35,7 @@ class MainMenu(InputValidation, MenuInterface):
     def __init__(self):
         self.current_state = menu_state.INITIAL_STATE
         self.account_service = None
-        self.current_account = None
+        # self.current_account = None
         # self.current_biostatHandler = None
     
     def set_state(self, state_value: int) -> None:
@@ -55,7 +56,7 @@ class MainMenu(InputValidation, MenuInterface):
         if self.account_service == None:
             self.account_service = AccountService()
         
-        if not self.account_service.run():
+        if self.account_service.run(): #run should return True when everything goes well.
             self.reset_state()
 
     def admin_submenu(self) -> None:
@@ -72,14 +73,32 @@ class MainMenu(InputValidation, MenuInterface):
     #     self.current_biostatHandler = None
 
     def display(self) -> None:
-        print('\nWelcome to RXBuddy!')
-        print('Please login or register...')
         self.current_state = menu_state.ACCOUNT_SUBMENU_STATE
-        # print('(C)lose the application')
-        # user_input = input().upper()
-        # if not self.validate_input(user_input, char_input = True, valid_input = 'CLSRK'):
-        #     raise MenuSelectionInvalidException("Please enter a valid menu option.")
+        if self.account_service == None:
+            print('\nWelcome to RXBuddy!')
+            print('Please login or register...')
+            return
+
+        if self.account_service.get_state() == account_service_state.CLOSING_STATE:
+            print('Are you sure you want to close the application? (Y/N)')
+            while True:
+                try:
+                    user_input = input('>>>').upper()
+                    if not self.validate_input(user_input, char_input = True, valid_input = 'YN'):
+                        raise MenuSelectionInvalidException("Please enter a valid menu option.")
+                    if user_input == 'Y':
+                        self.current_state = menu_state.CLOSING_STATE
+                    else:
+                        self.current_state = menu_state.INITIAL_STATE
+                        self.account_service.set_state(account_service_state.INITIAL_STATE)
+
+                    break
+                except MenuSelectionInvalidException as msg:
+                    print(msg.message)
         
+        if self.account_service.get_state() == account_service_state.LOADED_USER_STATE:
+            print('User loaded.')
+            print('Depending on account role, display one of three menus.')
         # match user_input:
         #     case 'C':
         #         self.current_state = menu_state.CREATING_PROFILE_STATE
@@ -93,55 +112,6 @@ class MainMenu(InputValidation, MenuInterface):
         #         self.current_state = menu_state.CLOSING_STATE
         #     case _:
         #         self.current_state = menu_state.INITIAL_STATE
-    
-    def create_profile(self) -> None:
-        pass
-        # self.reset_state()
-        # self.reset_data()
-        # profile_handler: ProfileHandler = ProfileHandler()
-        # if profile_handler.create_profile():
-        #     self.current_profile = profile_handler
-            
-    def load_profile(self) -> None:
-        pass
-        # self.reset_state()
-        # self.reset_data()
-        # profile_handler: ProfileHandler = ProfileHandler()
-        # if profile_handler.load_profile():
-        #     self.current_profile = profile_handler
-
-    def load_data(self) -> None:    
-        pass
-        # if self.current_profile == None:
-        #     self.reset_state()
-        #     raise InvalidProfileException("You haven't created or loaded a profile yet.")
-        
-        # filename = self.current_profile.get_filename()
-        # const_biostats: list[int] = self.current_profile.get_const_biostats()
-
-        # biostat_handler: BiostatHandler = BiostatHandler()
-        # if biostat_handler.load_data(filename, const_biostats):
-        #     self.current_biostatHandler = biostat_handler
-
-    def show_history(self) -> None:
-        pass
-        # self.reset_state()
-        # if self.current_biostatHandler == None:
-        #     raise DataMissingException('Data is missing, please either report some data or load a profile.')
-        
-        # self.current_biostatHandler.show_data()
-
-    def report_biostats(self) -> None:
-        pass
-        # self.reset_state()
-        # if self.current_biostatHandler != None:
-        #     self.current_biostatHandler.append_data()
-        #     return
-        
-        # biostat_handler: BiostatHandler = BiostatHandler()
-        # if biostat_handler.create_data():
-        #     self.current_biostatHandler = biostat_handler
-        
 
     def run(self) -> None:
         match self.current_state:

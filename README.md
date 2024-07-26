@@ -4,11 +4,13 @@ The current system is messy and errors can occur.
 A store where Patients can login, see their prescriptions, buy refills, and see a history of their purchased prescriptions.
 
 ## Note:
+    - Please run the prescription_store.sql file on the MySQL Workbench before running this application.
     - The entire project is inside a virtual environment folder called project-one. 
     - config/ directory needs to be created with a .csv file inside with the following data:
         - user, password, host, and database values in quotes. 
     - This is primarily meant as a security feature, but can be easily overided by hard coding the values.
     - The config/ folder was added to the .gitignore file, so that sensitive information isn't uploaded to github.
+    
 
 ## Features:
     - Focus on CLI, but once core features are implemented -> tkinter GUI

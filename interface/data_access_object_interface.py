@@ -1,11 +1,36 @@
 from abc import ABC
 import csv
+import logging
+import mysql.connector
 from mysql.connector import MySQLConnection
+from mysql.connector.cursor import MySQLCursor
+from custom_exceptions.connection_failed import ConnectionFailed
 
 class DataAccessObjectInterface(ABC):
 
     current_connection: MySQLConnection = None
+    current_cursor: MySQLCursor = None
 
+    @classmethod
+    def get_cursor(class_pointer) -> MySQLCursor:
+        """
+            This method should be called from child class as super().get_cursor() which will in turn 
+            call get_connection, and ensure that only one connection object and one cursor object are created.
+        """
+        logging.basicConfig(filename="logs/prescription_store.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
+        if class_pointer.current_connection == None:
+            if class_pointer.get_connection() == None:
+                raise ConnectionFailed("Please make sure the .csv file exists or the values are correct.")
+
+        if class_pointer.current_cursor == None:
+            try:
+                class_pointer.current_cursor = class_pointer.current_connection.cursor()
+            except (mysql.connector.ProgrammingError, ValueError) as mysql_error:
+                
+                return
+        logging.info("Connected to database successfully.")
+        return class_pointer.current_cursor
+    
     @classmethod
     def get_connection(class_pointer) -> MySQLConnection:
         """
@@ -22,15 +47,16 @@ class DataAccessObjectInterface(ABC):
                     database_var = row[3]
 
             if class_pointer.current_connection == None:
-                class_pointer.current_connection = MySQLConnection(user=user_var, password=pass_var,
+                class_pointer.current_connection = mysql.connector.connect(user=user_var, password=pass_var,
                               host=host_var, 
                               database=database_var)
+            
         except IOError as error:
             print(f"(I/O Error): {error.strerror}")
             print("Please make sure that the .csv file exists.")
             return
-        except Exception:
-            print(f"(Unknown Exception): ")
+        except mysql.connector.Error as msql_error:
+            print(f"(Error connecting to database): {msql_error.msg}")
             if class_pointer.current_connection != None:
                 class_pointer.current_connection.close()
                 class_pointer.current_connection = None
@@ -38,4 +64,11 @@ class DataAccessObjectInterface(ABC):
 
         return class_pointer.current_connection        
 
+    @classmethod
+    def close_connection(class_pointer) -> bool:
+        class_pointer.current_connection.commit()
+        class_pointer.current_cursor.close()
+        class_pointer.current_connection.close()
+        logging.info("Database connection closed. Changes commited.")
+        return True
     

@@ -1,12 +1,16 @@
 from interface.data_access_object_interface import DataAccessObjectInterface
-from data_model_classes.account import Account
+from implementation.data_model_classes.account import Account
+import logging
+import mysql.connector
+from mysql.connector.cursor import MySQLCursor
 
 class AccountDAO(DataAccessObjectInterface):
     """
         This class is meant for retrieving, updating, creating, or deleting accounts from the accounts table.
     """
     def __init__(self):
-        self.accounts: list[Account] = []
+        self.accounts: list[Account] = [] # used for caching accounts. individual account is returned.
+        logging.basicConfig(filename="logs/prescription_store.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
 
     def get_all_accounts(self) -> bool:
         """
@@ -16,7 +20,12 @@ class AccountDAO(DataAccessObjectInterface):
 
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
-        pass
+        cursor: MySQLCursor = super().get_cursor()
+        query = 'SELECT * FROM accounts;'
+        cursor.execute(query)
+        
+        for record in cursor:
+            print(record)
 
     def get_account_by_username(self, username: str) -> Account:
         """
@@ -26,7 +35,14 @@ class AccountDAO(DataAccessObjectInterface):
 
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
-        pass
+        cursor: MySQLCursor = super().get_cursor()
+        query = f'SELECT * FROM accounts WHERE username = \'{username}\''
+        cursor.execute(query)
+
+        for row in cursor:
+            print(row)
+
+        logging.info('Account retrieved from database.')
 
     def create_account(self, account: Account) -> bool:
         """
