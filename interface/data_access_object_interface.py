@@ -17,7 +17,7 @@ class DataAccessObjectInterface(ABC):
             This method should be called from child class as super().get_cursor() which will in turn 
             call get_connection, and ensure that only one connection object and one cursor object are created.
         """
-        logging.basicConfig(filename="logs/prescription_store.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
+        logging.basicConfig(filename="logs/rxbuddy_database.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
         class_pointer.get_connection()
         if class_pointer.current_connection == None:
             raise ConnectionFailed("Please make sure the .csv file exists or the values are correct.")
@@ -57,6 +57,7 @@ class DataAccessObjectInterface(ABC):
             return
         except mysql.connector.Error as msql_error:
             print(f"(Error connecting to database): {msql_error.msg}")
+            logging.warning('Connection to MySQL failed, please make sure .csv file exists in config folder.')
             if class_pointer.current_connection != None:
                 class_pointer.current_connection.close()
                 class_pointer.current_connection = None

@@ -10,7 +10,7 @@ class AccountDAO(DataAccessObjectInterface):
     """
     def __init__(self):
         self.accounts: list[Account] = [] # used for caching accounts. individual account is returned.
-        logging.basicConfig(filename="logs/prescription_store.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
+        logging.basicConfig(filename="logs/rxbuddy_database.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
 
     def get_all_accounts(self) -> bool:
         """
@@ -20,12 +20,15 @@ class AccountDAO(DataAccessObjectInterface):
 
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
-        cursor: MySQLCursor = super().get_cursor()
+        cursor: MySQLCursor = super().get_cursor() 
         query = 'SELECT * FROM accounts;'
         cursor.execute(query)
-        
-        for record in cursor:
-            print(record)
+        self.accounts = []
+        for _, row in enumerate(cursor):
+            self.accounts.append(Account(row[0], row[3], row[4], row[1], row[2], row[5]))
+
+        logging.info('All accounts retrieved from database.')
+        return self.accounts
 
     def get_account_by_username(self, username: str) -> Account:
         """
