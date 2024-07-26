@@ -15,7 +15,14 @@ class AccountServiceInterface(MenuBaseClass):
             Method for login with existing username. It will ask for the username and password, and validate the password. 
         """
         ...
-    
+
+    @abstractmethod
+    def account_greeting(self) -> None:
+        """
+            Method called when login is successful. 
+        """
+        ...
+
     @abstractmethod
     def process_input(self) -> None:
         """

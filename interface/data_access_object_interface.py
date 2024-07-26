@@ -18,9 +18,9 @@ class DataAccessObjectInterface(ABC):
             call get_connection, and ensure that only one connection object and one cursor object are created.
         """
         logging.basicConfig(filename="logs/prescription_store.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
+        class_pointer.get_connection()
         if class_pointer.current_connection == None:
-            if class_pointer.get_connection() == None:
-                raise ConnectionFailed("Please make sure the .csv file exists or the values are correct.")
+            raise ConnectionFailed("Please make sure the .csv file exists or the values are correct.")
 
         if class_pointer.current_cursor == None:
             try:
@@ -35,7 +35,9 @@ class DataAccessObjectInterface(ABC):
     def get_connection(class_pointer) -> MySQLConnection:
         """
             Make sure to have a .csv file with user, password, host, and database columns in a directory called config/
+            No quotes or spaces between.
         """
+        logging.info('Attempting to connect...')
         try:
             filename = 'config/mysql_connection_vars.csv'
             with open(filename, 'r') as mysqlvars_file:
@@ -45,11 +47,9 @@ class DataAccessObjectInterface(ABC):
                     pass_var = row[1]
                     host_var = row[2]
                     database_var = row[3]
-
+            
             if class_pointer.current_connection == None:
-                class_pointer.current_connection = mysql.connector.connect(user=user_var, password=pass_var,
-                              host=host_var, 
-                              database=database_var)
+                class_pointer.current_connection = mysql.connector.connect(user=user_var, password=pass_var, host=host_var, database=database_var)
             
         except IOError as error:
             print(f"(I/O Error): {error.strerror}")

@@ -60,13 +60,13 @@ class MainMenu(InputValidation, MenuInterface):
             self.reset_state()
 
     def admin_submenu(self) -> None:
-        return super().admin_submenu()
+        pass
     
-    def order_submenu(self) -> None:
-        return super().order_submenu()
+    def patient_submenu(self) -> None:
+        pass
     
-    def prescription_submenu(self) -> None:
-        return super().prescription_submenu()
+    def doctor_submenu(self) -> None:
+        pass
     
     # def reset_data(self) -> None:
     #     self.current_profile = None
@@ -97,21 +97,15 @@ class MainMenu(InputValidation, MenuInterface):
                     print(msg.message)
         
         if self.account_service.get_state() == account_service_state.LOADED_USER_STATE:
-            print('User loaded.')
-            print('Depending on account role, display one of three menus.')
-        # match user_input:
-        #     case 'C':
-        #         self.current_state = menu_state.CREATING_PROFILE_STATE
-        #     case 'L':
-        #         self.current_state = menu_state.LOADING_PROFILE_STATE
-        #     case 'S':
-        #         self.current_state = menu_state.SHOW_HISTORY_STATE
-        #     case 'R':
-        #         self.current_state = menu_state.REPORT_BIOSTATS_STATE
-        #     case 'K':
-        #         self.current_state = menu_state.CLOSING_STATE
-        #     case _:
-        #         self.current_state = menu_state.INITIAL_STATE
+            self.account_service.account_greeting()
+            account_role = self.account_service.get_account_role()
+            match account_role:
+                case 'Admin':
+                    self.current_state = menu_state.ADMIN_SUBMENU_STATE
+                case 'Patient':
+                    self.current_state = menu_state.PATIENT_SUBMENU_STATE
+                case 'Doctor':
+                    self.current_state = menu_state.DOCTOR_SUBMENU_STATE
 
     def run(self) -> None:
         match self.current_state:
@@ -119,6 +113,12 @@ class MainMenu(InputValidation, MenuInterface):
                 self.display()
             case menu_state.ACCOUNT_SUBMENU_STATE:
                 self.account_submenu()
+            case menu_state.ADMIN_SUBMENU_STATE:
+                self.admin_submenu()
+            case menu_state.PATIENT_SUBMENU_STATE:
+                self.patient_submenu()
+            case menu_state.DOCTOR_SUBMENU_STATE:
+                self.doctor_submenu()
         #     case menu_state.CREATING_PROFILE_STATE:
         #         self.create_profile()
         #     case menu_state.LOADING_PROFILE_STATE:

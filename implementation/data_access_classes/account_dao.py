@@ -36,13 +36,15 @@ class AccountDAO(DataAccessObjectInterface):
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
         cursor: MySQLCursor = super().get_cursor()
-        query = f'SELECT * FROM accounts WHERE username = \'{username}\''
+        query = f'SELECT * FROM accounts WHERE accountUsername = \'{username}\';'
         cursor.execute(query)
+        tmp_account = None
+        for _, row in enumerate(cursor):
+            tmp_account = Account(int(row[0]), row[3], row[4], row[1], row[2], int(row[5]))
 
-        for row in cursor:
-            print(row)
 
         logging.info('Account retrieved from database.')
+        return tmp_account
 
     def create_account(self, account: Account) -> bool:
         """

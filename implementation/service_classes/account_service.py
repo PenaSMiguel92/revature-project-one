@@ -24,7 +24,7 @@ class AccountService(InputValidation, AccountServiceInterface):
         self.current_account: Account = None
 
     def account_login(self) -> None:
-        print('Please enter your username: ')
+        print('\nPlease enter your username: ')
         while self.current_account == None:
             try:
                 username = input('>>>').lower()
@@ -33,17 +33,42 @@ class AccountService(InputValidation, AccountServiceInterface):
                 break
             except Error as mysql_error:
                 print('Username does not exist. Please enter a valid username.')
+        if self.current_account == None:
+            print('Username does not exist. Please enter a valid username.')
+            self.current_state = account_service_state.INITIAL_STATE
+            return False
+        
+        print('\nPlease enter your password: ')
+        retries = 3
+        while retries > 0:
+            user_password = input('>>>')
+            if self.current_account.password != user_password:
+                print(f"Passwords do not match, please try again ({retries - 1})")
+                retries -= 1
+            else:
+                break
 
-            
+        if retries == 0:
+            print('Too many attempts. Try again later.')
+            self.current_account = None
+            self.current_state = account_service_state.INITIAL_STATE
+            return False
+        
         return True
     
+    def account_greeting(self) -> None:
+        if self.current_account == None:
+            return 
+        
+        print(f'\nWelcome back {self.current_account.first_name} {self.current_account.last_name}! What would you like to do? ')
+
     def account_register(self) -> None:
         print('Registering account.')
         self.current_state = account_service_state.LOADED_USER_STATE
         return True
     
     def display(self) -> bool:
-        print('Would you like to register a new user or login?')
+        print('\nWould you like to register a new user or login?')
         print('(R)egister')   
         print('(L)ogin') 
         print('(E)xit')

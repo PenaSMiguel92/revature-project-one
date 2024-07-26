@@ -37,15 +37,15 @@ class MenuInterface(MenuBaseClass):
         pass
 
     @abstractmethod
-    def order_submenu(self) -> None:
+    def patient_submenu(self) -> None:
         """
-            Relay responsibility of handling orders to another class.
+            Relay responsibility of handling patient actions to another class.
         """
         pass
 
     @abstractmethod
-    def prescription_submenu(self) -> None:
+    def doctor_submenu(self) -> None:
         """
-            Relay responsibility of handling prescriptions to another class.
+            Relay responsibility of handling doctor actions to another class.
         """
         pass
