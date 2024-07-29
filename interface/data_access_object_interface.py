@@ -6,10 +6,15 @@ from mysql.connector import MySQLConnection
 from mysql.connector.cursor import MySQLCursor
 from custom_exceptions.connection_failed import ConnectionFailed
 
-class DataAccessObjectInterface(ABC):
+class DataAccessObjectInterface(object):
 
     current_connection: MySQLConnection = None
     current_cursor: MySQLCursor = None
+
+    def __init__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(DataAccessObjectInterface, cls).__new__(cls)
+        return cls.instance
 
     @classmethod
     def get_cursor(class_pointer) -> MySQLCursor:

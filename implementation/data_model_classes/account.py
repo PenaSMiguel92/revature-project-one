@@ -10,4 +10,4 @@ class Account():
     last_name: str
     username: str
     password: str
-    role_id: int
+    roleName: str

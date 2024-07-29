@@ -99,6 +99,9 @@ class AccountService(InputValidation, AccountServiceInterface):
     def get_state(self) -> int:
         return self.current_state
     
+    def get_account_role(self) -> bool:
+        return self.current_account.roleName
+
     def run(self) -> bool:
         match self.current_state:
             case account_service_state.INITIAL_STATE:

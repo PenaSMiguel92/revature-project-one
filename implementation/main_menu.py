@@ -60,13 +60,13 @@ class MainMenu(InputValidation, MenuInterface):
             self.reset_state()
 
     def admin_submenu(self) -> None:
-        pass
+        ...
     
     def patient_submenu(self) -> None:
-        pass
+        ...
     
     def doctor_submenu(self) -> None:
-        pass
+        ...
     
     # def reset_data(self) -> None:
     #     self.current_profile = None

@@ -43,3 +43,9 @@ class AccountServiceInterface(MenuBaseClass):
             Use this to get the state instead of accessing it directly.
         """
         ...
+
+    def get_account_role(self) -> bool:
+        """
+            Use this to get the account's current role.
+        """
+        ...
