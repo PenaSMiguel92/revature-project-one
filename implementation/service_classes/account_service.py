@@ -5,10 +5,11 @@ from implementation.data_access_classes.account_dao import AccountDAO
 from implementation.data_model_classes.account import Account
 
 from mysql.connector import Error
-
 from enum import Enum
 
-account_service_state = Enum('USER_STATE', [
+import logging
+
+account_service_state = Enum('ACCOUNT_STATE', [
     'INITIAL_STATE',
     'CREATING_USER_STATE',
     'LOADING_USER_STATE',
@@ -19,6 +20,7 @@ account_service_state = Enum('USER_STATE', [
 class AccountService(InputValidation, AccountServiceInterface):
 
     def __init__(self) -> None:
+        logging.basicConfig(filename="logs/rxbuddy_database.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
         self.current_state = account_service_state.INITIAL_STATE
         self.account_dao: AccountDAO = AccountDAO()
         self.current_account: Account = None
@@ -63,7 +65,14 @@ class AccountService(InputValidation, AccountServiceInterface):
         print(f'\nWelcome back {self.current_account.first_name} {self.current_account.last_name}! What would you like to do? ')
 
     def account_register(self) -> None:
-        print('Registering account.')
+        # while self.current_account == None: 
+        print('Please enter a username: ')
+        user_input = input('>>>').lower()
+        check_existing = self.account_dao.get_account_by_username(user_input)
+        if check_existing != None:
+            print('That username is already taken! Please try again.')
+            logging.error('Attempted to create an existing username in database.')
+
         self.current_state = account_service_state.LOADED_USER_STATE
         return True
     

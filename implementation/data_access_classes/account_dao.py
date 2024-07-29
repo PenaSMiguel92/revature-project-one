@@ -10,21 +10,10 @@ class AccountDAO(DataAccessObjectInterface):
     """
         This class is meant for retrieving, updating, creating, or deleting accounts from the accounts table.
     """
-    accounts: list[Account] = []
-
     def __init__(cls):
-        if not hasattr(cls, 'instance'):
-            logging.basicConfig(filename="logs/rxbuddy_database.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
-            cls.instance = super(AccountDAO, cls).__new__(cls)
-        return cls.instance
-        # self.accounts: list[Account] = [] # used for caching accounts. individual account is returned.
-        
-    @classmethod
-    def get_accountDAO(class_pointer):
-        # if class_pointer.
-        ...
+        logging.basicConfig(filename="logs/rxbuddy_database.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
 
-    def get_all_accounts(self) -> bool:
+    def get_all_accounts(self) -> list[Account]:
         """
             This method will cache all accounts from the accounts table to a list.
             
@@ -33,14 +22,14 @@ class AccountDAO(DataAccessObjectInterface):
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
         cursor: MySQLCursor = super().get_cursor() 
-        query = 'SELECT a.accountID, a.accountUsername, a.accountPassword, a.firstName, a.lastName, r.roleName FROM accounts AS a JOIN roles as r ON a.accountRole = r.roleID;'
+        query = 'SELECT a.accountID, a.accountUsername, a.accountPassword, a.firstName, a.lastName, a.balance, r.roleName FROM accounts AS a JOIN roles as r ON a.accountRole = r.roleID;'
         cursor.execute(query)
-        self.accounts = []
+        accounts: list[Account] = []
         for _, row in enumerate(cursor):
-            self.accounts.append(Account(int(row[0]), row[3], row[4], row[1], row[2], row[5]))
+            accounts.append(Account(int(row[0]), row[1], row[2], row[3], row[4], float(row[5]), row[6]))
 
-        logging.info('All accounts retrieved from database.')
-        return self.accounts
+        logging.info('All accounts retrieved from database successfully.')
+        return accounts
 
     def get_account_by_username(self, username: str) -> Account:
         """
@@ -51,12 +40,12 @@ class AccountDAO(DataAccessObjectInterface):
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
         cursor: MySQLCursor = super().get_cursor()
-        query = f'SELECT a.accountID, a.accountUsername, a.accountPassword, a.firstName, a.lastName, r.roleName FROM accounts AS a JOIN roles AS r ON a.accountRole = r.roleID WHERE accountUsername = \'{username}\';'
+        query = f'SELECT a.accountID, a.accountUsername, a.accountPassword, a.firstName, a.lastName, a.balance, r.roleName FROM accounts AS a JOIN roles AS r ON a.accountRole = r.roleID WHERE accountUsername = \'{username}\';'
         cursor.execute(query)
         tmp_account = None
         for _, row in enumerate(cursor):
-            tmp_account = Account(int(row[0]), row[3], row[4], row[1], row[2], row[5])
-
+            tmp_account = Account(int(row[0]), row[1], row[2], row[3], row[4], float(row[5]), row[6])
+            break
 
         logging.info('Account retrieved from database.')
         return tmp_account
@@ -67,7 +56,12 @@ class AccountDAO(DataAccessObjectInterface):
 
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
-        pass
+        cursor: MySQLCursor = super().get_cursor()
+        query_start = f'INSERT INTO accounts (accountID, accountUsername, accountPassword, firstName, lastName, balance, roleID) VALUES '
+        query_end = f'(DEFAULT, \'{account.accountUsername}\', \'{account.accountPassword}\', \'{account.firstName}\', \'{account.lastName}\', 0.00, 2)'
+        cursor.execute(query_start + query_end)
+        logging.info('Account created and saved to database.')
+        return True
 
     def update_account(self, account: Account) -> bool:
         """
@@ -77,7 +71,14 @@ class AccountDAO(DataAccessObjectInterface):
 
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
-        pass
+        roles = ['Admin', 'Patient', 'Doctor']
+        new_roleID = roles.index(account.roleName)
+        cursor: MySQLCursor = super().get_cursor()
+        query_start = f'UPDATE accounts SET balance={account.balance}, roleID={new_roleID}'
+        query_end = f' WHERE accountID={account.accountID};'
+        cursor.execute(query_start + query_end)
+        logging.info('Account attributes updated.')
+        return True
 
     def delete_account_by_username(self, username: str) -> bool:
         """
@@ -85,4 +86,14 @@ class AccountDAO(DataAccessObjectInterface):
 
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
-        pass
+        try:
+            cursor: MySQLCursor = super().get_cursor()
+            query = f'DELETE FROM accounts WHERE accountUsername=\'{username}\''
+            cursor.execute(query)
+
+        except mysql.connector.Error as Err:
+            logging.error(Err.msg)
+            return False
+        
+        logging.info(f'Deleted {username} from accounts table in database.')
+        return True        

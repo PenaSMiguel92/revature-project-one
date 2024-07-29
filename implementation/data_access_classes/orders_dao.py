@@ -7,7 +7,6 @@ from mysql.connector.cursor import MySQLCursor
 
 class OrdersDAO(DataAccessObjectInterface):
     def __init__(self):
-        self.orders: list[Shop_Order] = []
         logging.basicConfig(filename="logs/rxbuddy_database.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
         
     def get_all_orders(self) -> list[Shop_Order]:
@@ -19,14 +18,13 @@ class OrdersDAO(DataAccessObjectInterface):
             This method will return a list of Shop_Order ORM objects if transaction was successful, raise an exception otherwise.
         """
         cursor: MySQLCursor = super().get_cursor()
-        query = 'SELECT * FROM orders;'
-        cursor.execute(query)
-        self.orders = []
-        for _, row in enumerate(cursor):
-            self.orders.append(Shop_Order(int(row[0]), int(row[1]), int(row[2]), int(row[3]), float(row[4])))
+        query_start = 'SELECT o.orderID, a.firstName, a.lastName, m.medicationName, m.medicationCost, o.quantity, o.totalAmount '
+        query_joining = 'FROM orders AS o JOIN accounts AS a ON o.accountID=a.accountID JOIN medications AS m ON o.medicationID=m.medicationID;'
+        cursor.execute(query_start + query_joining)
+        orders: list[Shop_Order] = [Shop_Order(int(row[0]), row[1], row[2], row[3], float(row[4]), int(row[5]), float(row[6])) for _, row in enumerate(cursor)]
 
         logging.info('All orders were retrieved successfully.')
-        return self.orders
+        return orders
 
     def get_orders_by_username(self, username: str) -> list[Shop_Order]:
         """
@@ -35,14 +33,14 @@ class OrdersDAO(DataAccessObjectInterface):
             This method will return a list of Shop_Order ORM objects if transaction was successful, raise an exception otherwise.
         """
         cursor: MySQLCursor = super().get_cursor()
-        query = f"SELECT o.orderID, o.accountID, o.medicationID, o.quantity, o.total_sales FROM accounts AS a JOIN orders AS o ON a.accountID = o.accountID WHERE a.accountUsername = \'{username}\';"
-        cursor.execute(query)
-        orders: list[Shop_Order] = []
-        for _, row in enumerate(cursor):
-            orders.append(Shop_Order(int(row[0]), int(row[1]), int(row[2]), int(row[3]), float(row[4])))
+        query_returnColumns = 'SELECT o.orderID, a.firstName, a.lastName, m.medicationName, m.medicationCost, o.quantity, o.totalAmount ' 
+        query_joining = f'FROM orders AS o JOIN accounts AS a ON o.accountID=a.accountID JOIN medications AS m ON o.medicationID=m.medicationID '
+        query_condition = f'WHERE a.accountUsername=\'{username}\';'
+        cursor.execute(query_returnColumns + query_joining + query_condition)
+        orders_by_username: list[Shop_Order] = [Shop_Order(int(row[0]), row[1], row[2], row[3], float(row[4]), int(row[5]), float(row[6])) for _, row in enumerate(cursor)]
 
         logging.info(f'All orders by {username} were retrieved successfully.')
-        return orders
+        return orders_by_username
     def create_order(self, order: Shop_Order) -> bool:
         """
             This method will insert specified order into orders table for saving.

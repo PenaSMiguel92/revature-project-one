@@ -1,35 +1,59 @@
 from interface.data_access_object_interface import DataAccessObjectInterface
 from data_model_classes.medication import Medication
+import logging
+import mysql.connector
+from mysql.connector.cursor import MySQLCursor
 
 class MedicationDAO(DataAccessObjectInterface):
     """
         This class is meant for retrieving medications from the medications table. 
     """
     def __init__(self):
-        self.medications: list[Medication] = []
+        logging.basicConfig(filename="logs/rxbuddy_database.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
     
-    def get_all_medications(self) -> bool:
+    def get_all_medications(self) -> list[Medication]:
         """
             This method will return all medications from the medications table.
             
             This method should only be accessible by an admin or doctor.
 
-            This method will return a boolean True value if transaction was successful, raise an exception otherwise.
+            This method will return a list of medications if transaction was successful, raise an exception otherwise.
         """
-        ...
+        cursor: MySQLCursor = super().get_cursor()
+        query = 'SELECT * FROM medications;'
+        cursor.execute(query)
+        medications: list[Medication] = []
+        for _, row in enumerate(cursor):
+            medications.append(Medication(int(row[0]), row[1], float(row[2])))
 
-    def get_medication_by_name(self, name: str) -> bool:
+        logging.info('All medications retrieved from database successfully.')
+        return medications
+
+    def get_medication_by_name(self, name: str) -> Medication:
         """
             This method will return medication associated with provided name. 
 
             This method should be accessible from the prescription submenu. 
 
-            This method will return a boolean True value if transaction was successful, raise an exception otherwise.
+            This method will return a Medication object if transaction was successful, raise an exception otherwise.
         """
-        ...
+        cursor: MySQLCursor = super().get_cursor()
+        query = f'SELECT * FROM medications WHERE medicationName=\'{name}\';'
+        cursor.execute(query)
+        for _, row in enumerate(cursor):
+            medication_result: Medication = Medication(int(row[0]), row[1], float(row[2]))
+
+        logging.info('Medication retrieved from database successfully.')
+        return medication_result
 
     def create_medication(self, medication: Medication) -> bool:
-        ...
+
+        cursor: MySQLCursor = super().get_cursor()
+        query_start = f'INSERT INTO medications (medicationID, medicationName, medicationCost) VALUES '
+        query_end = f'(DEFAULT, \'{medication.medicationName}\', {medication.medicationCost})'
+        cursor.execute(query_start + query_end)
+        logging.info('Medication created and saved to database.')
+        return True
 
     def update_medication(self, medication: Medication) -> bool:
         ...
