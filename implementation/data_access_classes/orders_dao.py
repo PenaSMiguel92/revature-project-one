@@ -35,7 +35,7 @@ class OrdersDAO(DataAccessObjectInterface):
             This method will return a list of Shop_Order ORM objects if transaction was successful, raise an exception otherwise.
         """
         cursor: MySQLCursor = super().get_cursor()
-        query = f"SELECT o.orderID, o.accountID, o.medicationID, o.quantity, o.total_sales FROM accounts AS a JOIN orders AS o ON a.accountID = o.accountID WHERE a.accountUsername = \'{username}\'"
+        query = f"SELECT o.orderID, o.accountID, o.medicationID, o.quantity, o.total_sales FROM accounts AS a JOIN orders AS o ON a.accountID = o.accountID WHERE a.accountUsername = \'{username}\';"
         cursor.execute(query)
         orders: list[Shop_Order] = []
         for _, row in enumerate(cursor):

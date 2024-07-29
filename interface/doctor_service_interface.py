@@ -11,21 +11,21 @@ class PatientServiceInterface(MenuBaseClass):
         ...
     
     @abstractmethod
-    def view_orders(self) -> None:
+    def view_prescriptions_by_patientID(self) -> None:
         ...
     
     @abstractmethod
-    def delete_order(self) -> None:
+    def delete_prescription(self) -> None:
         ...
     
     @abstractmethod
-    def create_order(self) -> None:
+    def create_prescription(self) -> None:
         ...
     
     @abstractmethod
-    def edit_order(self) -> None:
+    def edit_prescription(self) -> None:
         ...
 
     @abstractmethod
-    def view_prescriptions(self) -> None:
+    def view_all_prescriptions(self) -> None:
         ...
