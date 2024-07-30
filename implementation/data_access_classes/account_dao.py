@@ -94,7 +94,7 @@ class AccountDAO(DataAccessObjectInterface):
         """
         cursor: MySQLCursor = super().get_cursor()
         query_start = f'INSERT INTO accounts (accountID, accountUsername, accountPassword, firstName, lastName, balance, accountRole) VALUES '
-        query_end = f'(DEFAULT, \'{account.accountUsername}\', \'{account.accountPassword}\', \'{account.firstName}\', \'{account.lastName}\', 0.00, 2)'
+        query_end = f'(DEFAULT, \'{account.accountUsername}\', \'{account.accountPassword}\', \'{account.firstName}\', \'{account.lastName}\', {account.balance}, 2)'
         cursor.execute(query_start + query_end)
         super().commit_changes()
         logging.info('Account created and saved to database.')

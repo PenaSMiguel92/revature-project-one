@@ -30,7 +30,6 @@ class InputValidation():
                     numeric = char.isdigit()
                 if not space:
                     space = char.isspace()
-            print(alpha, numeric, space)
             valid = (alpha and numeric and not space) #contains at least a letter and a number, but cannot have any whitespace.
             return valid and len(input_value) > 4
         else:

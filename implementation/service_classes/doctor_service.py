@@ -15,9 +15,9 @@ from enum import Enum
 
 doctor_service_state = Enum('DOCTOR_STATE', [
     'INITIAL_STATE',
-    'VIEW_PATIENTS_STATE',
     'CREATE_PRESCRIPTION_STATE',
     'MODIFY_PRESCRIPTIONS_STATE',
+    'MODFIY_MEDICATIONS_STATE',
     'CLOSING_STATE'
 ])
 
@@ -40,8 +40,6 @@ class DoctorService(InputValidation, DoctorServiceInterface):
     
     def get_state(self) -> int:
         return self.current_state
-    
-   
     
     def get_medication_from_list(self, med_id: int,  med_list: list[Medication]) -> Medication:
         target_med = list(filter(lambda item: item.medicationID == med_id, med_list))
@@ -167,7 +165,7 @@ class DoctorService(InputValidation, DoctorServiceInterface):
                     raise DoctorMenuSelectionInvalid('One or more inputs were invalid, please make sure to input valid IDs.')
 
                 self.prescriptions_dao.create_prescriptions_from_list(self.current_account, patient_account, medication_list)
-                
+                self.prescriptions = self.prescriptions_dao.get_all_prescriptions()
                 break
             except DoctorMenuSelectionInvalid as err: 
                 print(err.message)
@@ -183,7 +181,7 @@ class DoctorService(InputValidation, DoctorServiceInterface):
             case 'B':
                 self.current_state = doctor_service_state.MODIFY_PRESCRIPTIONS_STATE
             case 'C':
-                self.current_state = doctor_service_state.MODIFY_MEDICATIONS_STATE
+                self.current_state = doctor_service_state.MODFIY_MEDICATIONS_STATE
             case 'D':
                 self.current_state = doctor_service_state.CLOSING_STATE
         

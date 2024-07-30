@@ -72,7 +72,7 @@ class OrdersDAO(DataAccessObjectInterface):
         
         patient.balance -= medication.medicationCost
         cursor: MySQLCursor = super().get_cursor()
-        query_start = f'UPDATE accounts SET balance={patient.balance}, roleID=2'
+        query_start = f'UPDATE accounts SET balance={patient.balance}, accountRole=2'
         query_end = f' WHERE accountID={patient.accountID};'
         cursor.execute(query_start + query_end)
         query_start = 'INSERT INTO orders (orderID, accountID, medicationID) VALUES '
@@ -99,15 +99,18 @@ class OrdersDAO(DataAccessObjectInterface):
             patient.balance -= medication.medicationCost
             if index == len(medication_list) - 1:
                 query += f'(DEFAULT, {patient.accountID}, {medication.medicationID});'
+                stop_index = index
                 continue
             query += f'(DEFAULT, {patient.accountID}, {medication.medicationID}),'
         
         if stop_index < len(medication_list) - 1:
-            query[-1] = ';'
-        
+            query_list = list(query)
+            query_list[-1] = ';'
+            query = ''.join(query_list)
+        print(query)
         cursor.execute(query)
 
-        query_start = f'UPDATE accounts SET balance={patient.balance}, roleID=2'
+        query_start = f'UPDATE accounts SET balance={patient.balance}, accountRole=2'
         query_end = f' WHERE accountID={patient.accountID};'
         cursor.execute(query_start + query_end)
         super().commit_changes()

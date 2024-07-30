@@ -54,9 +54,25 @@ class PatientService(InputValidation, PatientServiceInterface):
             result_str += f'Order ID: {order.orderID} - Product: {order.medicationName} - Total: ${order.medicationCost} \n'
 
         print(result_str)
+        submenu_option = ''
+        while True:
+            try: 
+                print('Choose an option: ')
+                print('A. Modify orders - NOT IMPLEMENTED')
+                print('B. Cancel')
+                submenu_option = input('>>>').upper()
+                if not self.validate_input(submenu_option, char_input=True, valid_input='B'):
+                    raise PatientMenuSelectionInvalid('Please select a valid submenu option.')
+                break
+            except PatientMenuSelectionInvalid as err:
+                print(err.message)
+        
+        if submenu_option == 'B':
+            self.current_state = patient_service_state.INITIAL_STATE
+            return True
 
     def get_medication_from_list(self, med_id: int,  med_list: list[Medication]) -> Medication:
-        target_med = filter(lambda item: item.medicationID == med_id, med_list)
+        target_med = list(filter(lambda item: item.medicationID == med_id, med_list))
         return target_med[0]
     
     def display_prescriptions(self) -> bool:
@@ -71,7 +87,8 @@ class PatientService(InputValidation, PatientServiceInterface):
         for prescription in self.prescriptions:
             result_str += f'ID: {prescription.prescriptionID} - {prescription.medicationName}\n'
             valid_medIDs.add(prescription.prescriptionID)
-
+        
+        print(result_str)
         while True:
             try: 
                 print('\nWhich would you like to purchase? (separate IDs by spaces)')
@@ -86,7 +103,7 @@ class PatientService(InputValidation, PatientServiceInterface):
                         one_or_more_invalid = True
                         continue
                     medication_list.append(self.get_medication_from_list(int(input_value), self.medications))
-                        
+                
                 if one_or_more_invalid:
                     raise PatientMenuSelectionInvalid('One or more inputs were invalid, please make sure to input valid IDs.')
 
@@ -109,6 +126,8 @@ class PatientService(InputValidation, PatientServiceInterface):
                 self.current_state = patient_service_state.CLOSING_STATE
 
     def display(self) -> bool:
+        self.prescriptions = self.prescriptions_dao.get_all_prescriptions()
+        self.orders = self.orders_dao.get_all_orders()
         print('\nWould you like to make or modify an order? ')
         print('A. Make an order.')
         print('B. Modify an order.')

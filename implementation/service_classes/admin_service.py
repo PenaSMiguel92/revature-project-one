@@ -149,8 +149,8 @@ class AdminService(InputValidation, AdminServiceInterface):
                 print('B. Patient')
                 print('C. Doctor')
                 print('D. Cancel')
-                user_input = input('>>>').upper()
-                if not self.validate_input(user_input, char_input=True, valid_input='ABCD'):
+                submenu_option = input('>>>').upper()
+                if not self.validate_input(submenu_option, char_input=True, valid_input='ABCD'):
                     raise AdminMenuSelectionInvalid('Please choose a valid submenu option.')
                 break
             except AdminMenuSelectionInvalid as err:
@@ -162,6 +162,7 @@ class AdminService(InputValidation, AdminServiceInterface):
         
         old_account = self.account_dao.get_account_by_id(accountID)
         roleUse = ''
+        print(submenu_option)
         if submenu_option == 'A':
             roleUse = 'Admin'
         elif submenu_option == 'B':
@@ -171,7 +172,6 @@ class AdminService(InputValidation, AdminServiceInterface):
         
         new_account = Account(old_account.accountID, old_account.accountUsername, old_account.accountPassword, old_account.firstName, old_account.lastName, old_account.balance, roleUse)
         self.account_dao.update_account(new_account)
-        
 
     def process_input(self, input):
         match (input):
