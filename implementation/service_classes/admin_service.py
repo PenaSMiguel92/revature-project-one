@@ -1,4 +1,5 @@
 from custom_exceptions.admin_menu_selection_invalid import AdminMenuSelectionInvalid
+from custom_exceptions.medication_invalid import MedicationInvalid
 
 from interface.admin_service_interface import AdminServiceInterface
 from interface.input_validation_interface import InputValidation
@@ -115,22 +116,63 @@ class AdminService(InputValidation, AdminServiceInterface):
             self.current_state = admin_service_state.INITIAL_STATE
             return True
 
+    def display_remove_medication(self, valid_ids:set[int]) -> None:
+        medid_input = ''
+        while True:
+            try:
+                print('Please enter the medication\'s id: ')
+                medid_input = input('>>>')
+                if not self.validate_input(medid_input, integer_input=True):
+                    raise MedicationInvalid('Medication id must be numerical.')
+                
+                if int(medid_input) not in valid_ids:
+                    raise MedicationInvalid('Medication id must be in the list above.')
+
+                break
+            except MedicationInvalid as err:
+                print(err.message)
+
+        self.medication_dao.delete_medication(int(medid_input))
+        print('Medication deleted successfully.')
+
+    def display_add_medication(self) -> None:
+        medname_input = ''
+        medcost_input = ''
+        while True:
+            try:
+                print('Please enter the medication\'s name: ')
+                medname_input = input('>>>')
+                if not self.validate_input(medname_input, string_input=True):
+                    raise MedicationInvalid('Medication name must have more than 2 characters and be alphabetical.')
+                
+                print('Please enter the medication\'s cost: ')
+                medcost_input = input('>>>')
+                if not self.validate_input(medcost_input, integer_input=True):
+                    raise MedicationInvalid('Please enter a valid dollar amount.')
+
+                break
+            except MedicationInvalid as err:
+                print(err.message)
+
+        self.medication_dao.create_medication(Medication(0, medname_input, float(medcost_input)))
+        print('Medication added successfully.')
+
     def display_medications(self) -> None:
         print('\nThe following are all the medications in the database: ')
-        # valid_IDs = set()
+        valid_IDs = set()
         result_str = ''
         for medication in self.medications:
             result_str += f'{medication.medicationID}. Name: {medication.medicationName} - Cost: ${medication.medicationCost}\n'
-            # valid_IDs.add(account.accountID)
+            valid_IDs.add(medication.medicationID)
         print(result_str)
         submenu_option = ''
         while True:
             try: 
                 print('Choose an option: ')
-                print('A. Modify medications - NOT IMPLEMENTED')
+                print('A. Modify medications')
                 print('B. Cancel')
                 submenu_option = input('>>>').upper()
-                if not self.validate_input(submenu_option, char_input=True, valid_input='B'):
+                if not self.validate_input(submenu_option, char_input=True, valid_input='AB'):
                     raise AdminMenuSelectionInvalid('Please select a valid submenu option.')
                 break
             except AdminMenuSelectionInvalid as err:
@@ -139,6 +181,32 @@ class AdminService(InputValidation, AdminServiceInterface):
         if submenu_option == 'B':
             self.current_state = admin_service_state.INITIAL_STATE
             return True
+        
+        while True:
+            try: 
+                print('Choose an option: ')
+                print('A. Add Medication')
+                print('B. Delete Medication')
+                print('C. Cancel')
+                submenu_option = input('>>>').upper()
+                if not self.validate_input(submenu_option, char_input=True, valid_input='ABC'):
+                    raise AdminMenuSelectionInvalid('Please select a valid submenu option.')
+                break
+            except AdminMenuSelectionInvalid as err:
+                print(err.message)
+
+        if submenu_option == 'C':
+            self.current_state = admin_service_state.INITIAL_STATE
+            return True
+        elif submenu_option == 'A':
+            self.display_add_medication()
+        elif submenu_option == 'B':
+            self.display_remove_medication(valid_IDs)
+
+        self.current_state = admin_service_state.INITIAL_STATE
+        return True
+
+
 
     def apply_role(self, accountID) -> None:
         submenu_option = ''
