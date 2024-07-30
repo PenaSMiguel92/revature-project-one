@@ -10,7 +10,7 @@ class AccountDAO(DataAccessObjectInterface):
     """
         This class is meant for retrieving, updating, creating, or deleting accounts from the accounts table.
     """
-    def __init__(cls):
+    def __init__(self):
         logging.basicConfig(filename="logs/rxbuddy_database.log", level=logging.DEBUG, format='%(asctime)s :: %(message)s')
 
     def get_all_accounts(self) -> list[Account]:

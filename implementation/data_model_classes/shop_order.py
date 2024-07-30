@@ -8,6 +8,7 @@ class Shop_Order():
         The information can be displayed to patients and admins. 
     """
     orderID: int
+    username: str
     firstName: str
     lastName: str
     medicationName: str

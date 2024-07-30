@@ -1,4 +1,7 @@
 from interface.data_access_object_interface import DataAccessObjectInterface
+from data_model_classes.account import Account
+from data_access_classes.account_dao import AccountDAO
+from data_model_classes.medication import Medication
 from data_model_classes.shop_order import Shop_Order
 import logging
 
@@ -18,10 +21,10 @@ class OrdersDAO(DataAccessObjectInterface):
             This method will return a list of Shop_Order ORM objects if transaction was successful, raise an exception otherwise.
         """
         cursor: MySQLCursor = super().get_cursor()
-        query_start = 'SELECT o.orderID, a.firstName, a.lastName, m.medicationName, m.medicationCost, o.quantity, o.totalAmount '
+        query_start = 'SELECT o.orderID, a.accountUsername, a.firstName, a.lastName, m.medicationName, m.medicationCost, o.quantity, o.totalAmount '
         query_joining = 'FROM orders AS o JOIN accounts AS a ON o.accountID=a.accountID JOIN medications AS m ON o.medicationID=m.medicationID;'
         cursor.execute(query_start + query_joining)
-        orders: list[Shop_Order] = [Shop_Order(int(row[0]), row[1], row[2], row[3], float(row[4]), int(row[5]), float(row[6])) for _, row in enumerate(cursor)]
+        orders: list[Shop_Order] = [Shop_Order(int(row[0]), row[1], row[2], row[3], row[4], float(row[5]), int(row[6]), float(row[7])) for _, row in enumerate(cursor)]
 
         logging.info('All orders were retrieved successfully.')
         return orders
@@ -33,24 +36,45 @@ class OrdersDAO(DataAccessObjectInterface):
             This method will return a list of Shop_Order ORM objects if transaction was successful, raise an exception otherwise.
         """
         cursor: MySQLCursor = super().get_cursor()
-        query_returnColumns = 'SELECT o.orderID, a.firstName, a.lastName, m.medicationName, m.medicationCost, o.quantity, o.totalAmount ' 
+        query_returnColumns = 'SELECT o.orderID, a.accountUsername, a.firstName, a.lastName, m.medicationName, m.medicationCost, o.quantity, o.totalAmount ' 
         query_joining = f'FROM orders AS o JOIN accounts AS a ON o.accountID=a.accountID JOIN medications AS m ON o.medicationID=m.medicationID '
         query_condition = f'WHERE a.accountUsername=\'{username}\';'
         cursor.execute(query_returnColumns + query_joining + query_condition)
-        orders_by_username: list[Shop_Order] = [Shop_Order(int(row[0]), row[1], row[2], row[3], float(row[4]), int(row[5]), float(row[6])) for _, row in enumerate(cursor)]
+        orders_by_username: list[Shop_Order] = [Shop_Order(int(row[0]), row[1], row[2], row[3], row[4], float(row[5]), int(row[6]), float(row[7])) for _, row in enumerate(cursor)]
 
         logging.info(f'All orders by {username} were retrieved successfully.')
         return orders_by_username
-    def create_order(self, order: Shop_Order) -> bool:
+    
+    def get_order_by_id(self, order_id: int) -> Shop_Order:
         """
-            This method will insert specified order into orders table for saving.
+            This method will return one order associated with the specified order_id.
+        """
+        cursor: MySQLCursor = super().get_cursor()
+        query_returnColumns = 'SELECT o.orderID, a.accountUsername, a.firstName, a.lastName, m.medicationName, m.medicationCost, o.quantity, o.totalAmount ' 
+        query_joining = f'FROM orders AS o JOIN accounts AS a ON o.accountID=a.accountID JOIN medications AS m ON o.medicationID=m.medicationID '
+        query_condition = f'WHERE o.orderID={order_id};'
+        cursor.execute(query_returnColumns + query_joining + query_condition)
+        for _, row in enumerate(cursor):
+            order: Shop_Order = Shop_Order(int(row[0]), row[1], row[2], row[3], row[4], float(row[5]), int(row[6]), float(row[7]))
+            break
+
+        logging.info(f'The order with ID: {order_id} was retrieved successfully.')
+        return order
+    
+    def create_order(self, patient: Account, medication: Medication, quantity: int) -> bool:
+        """
+            This method will create an order and insert it into orders table for saving based on the patient account object and medication object and how much was purchased.
 
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
-        ...
+        cursor: MySQLCursor = super().get_cursor()
+        query_start = 'INSERT INTO orders (orderID, accountID, medicationID, quantity, totalAmount) VALUES '
+        query_mid = f'(DEFAULT, {patient.accountID}, {medication.medicationID}, {quantity}, '
+        query_end = '{:.2f});'.format(quantity * medication.medicationCost)
+        cursor.execute(query_start + query_mid + query_end)
 
-    def update_order(self, order: Shop_Order) -> bool:
-        ...
+        logging.info(f'Created order for {patient.accountUsername} and saved to database.')
+        return True
 
     def delete_order_by_id(self, order_id: int) -> bool:
         """
@@ -60,4 +84,21 @@ class OrdersDAO(DataAccessObjectInterface):
 
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
-        ...
+        try:
+            cursor: MySQLCursor = super().get_cursor()
+            order: Shop_Order = self.get_order_by_id(order_id)
+
+            account_dao: AccountDAO = AccountDAO()
+
+            patient: Account = account_dao.get_account_by_username(order.username)
+            patient.balance += order.totalAmount
+            account_dao.update_account(patient)
+            query = f'DELETE FROM orders WHERE orderID={order_id}'
+            cursor.execute(query)
+        except mysql.connector.Error as Err:
+            print('Please make sure that the order id is valid.')
+            logging.error(Err.msg)
+            return False
+        
+        logging.info(f'Deleted order with ID: {order_id} from orders table and refunded ${order.totalAmount} to {patient.accountUsername} in database.')
+        return True  

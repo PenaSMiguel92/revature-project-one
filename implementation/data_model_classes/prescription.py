@@ -8,6 +8,8 @@ class Prescription():
         Information can be displayed to patients, doctors, and admins. 
     """
     prescriptionID: int
-    prescribedBy: str
-    prescribedTo: str
+    prescribedByUsername: str
+    prescribedToUsername: str
+    prescribedToFirstName: str
+    prescribedToLastName: str
     medicationName: str

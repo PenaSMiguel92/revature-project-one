@@ -42,12 +42,15 @@ class MedicationDAO(DataAccessObjectInterface):
         cursor.execute(query)
         for _, row in enumerate(cursor):
             medication_result: Medication = Medication(int(row[0]), row[1], float(row[2]))
+            break
 
-        logging.info('Medication retrieved from database successfully.')
+        logging.info(f'Medication with ID: {medication_result.medicationID} retrieved from database successfully.')
         return medication_result
 
     def create_medication(self, medication: Medication) -> bool:
-
+        """
+            This method will create a new record for the provided Medication object.
+        """
         cursor: MySQLCursor = super().get_cursor()
         query_start = f'INSERT INTO medications (medicationID, medicationName, medicationCost) VALUES '
         query_end = f'(DEFAULT, \'{medication.medicationName}\', {medication.medicationCost})'
@@ -56,8 +59,32 @@ class MedicationDAO(DataAccessObjectInterface):
         return True
 
     def update_medication(self, medication: Medication) -> bool:
-        ...
+        """
+            This method will update an existing medication in the medications table with the provided Medication object's new values.
+        """
+        cursor: MySQLCursor = super().get_cursor()
+        query_start = f'UPDATE medications SET medicationName={medication.medicationName}, medicationCost={medication.medicationCost}'
+        query_end = f' WHERE medicationID={medication.medicationID};'
+        cursor.execute(query_start + query_end)
+        logging.info(f'Medication with ID: {medication.medicationID} had its attributes updated on the database.')
+        return True
 
     def delete_medication(self, medicationID: int) -> bool:
-        ...
+        """
+            This method will delete an medication with the specified medicationID.
+
+            This method will return a boolean True value if transaction was successful, raise an exception otherwise.
+        """
+        try:
+            cursor: MySQLCursor = super().get_cursor()
+            query = f'DELETE FROM medications WHERE medicationID={medicationID}'
+            cursor.execute(query)
+
+        except mysql.connector.Error as Err:
+            logging.error(Err.msg)
+            return False
+        
+        logging.info(f'Deleted medication with ID: {medicationID} from medications table in database.')
+        return True        
+
     
