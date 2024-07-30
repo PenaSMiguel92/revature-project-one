@@ -147,8 +147,12 @@ class AccountDAO(DataAccessObjectInterface):
         """
         try:
             cursor: MySQLCursor = super().get_cursor()
-            query = f'DELETE FROM accounts WHERE accountID={accountID}'
-            cursor.execute(query)
+            query_orders = f'DELETE FROM orders WHERE accountID={accountID};'
+            query_prescriptions = f'DELETE FROM prescriptions WHERE prescribedTo={accountID};'
+            query_accounts = f'DELETE FROM accounts WHERE accountID={accountID};'
+            cursor.execute(query_orders)
+            cursor.execute(query_prescriptions)
+            cursor.execute(query_accounts)
 
         except mysql.connector.Error as Err:
             logging.error(Err.msg)

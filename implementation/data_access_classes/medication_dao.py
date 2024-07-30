@@ -75,12 +75,19 @@ class MedicationDAO(DataAccessObjectInterface):
         """
             This method will delete an medication with the specified medicationID.
 
+            This method will delete orders and prescriptions that refer to this medication.
+
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
         try:
             cursor: MySQLCursor = super().get_cursor()
-            query = f'DELETE FROM medications WHERE medicationID={medicationID}'
-            cursor.execute(query)
+            query_orders = f'DELETE FROM orders WHERE medicationID={medicationID};'
+            query_prescriptions = f'DELETE FROM prescriptions WHERE medicationID={medicationID};'
+            query_medications = f'DELETE FROM medications WHERE medicationID={medicationID};'
+
+            cursor.execute(query_orders)
+            cursor.execute(query_prescriptions)
+            cursor.execute(query_medications)
 
         except mysql.connector.Error as Err:
             logging.error(Err.msg)
