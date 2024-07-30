@@ -67,6 +67,24 @@ class AccountDAO(DataAccessObjectInterface):
 
         logging.info('Account retrieved from database.')
         return tmp_account
+    def get_account_by_id(self, accountID: int) -> Account:
+        """
+            This method will return account associated with provided accountID. 
+
+            This method should be accessible from admin menu. 
+
+            This method will return a boolean True value if transaction was successful, raise an exception otherwise.
+        """
+        cursor: MySQLCursor = super().get_cursor()
+        query = f'SELECT a.accountID, a.accountUsername, a.accountPassword, a.firstName, a.lastName, a.balance, r.roleName FROM accounts AS a JOIN roles AS r ON a.accountRole = r.roleID WHERE accountID={accountID};'
+        cursor.execute(query)
+        tmp_account = None
+        for _, row in enumerate(cursor):
+            tmp_account = Account(int(row[0]), row[1], row[2], row[3], row[4], float(row[5]), row[6])
+            break
+
+        logging.info('Account retrieved from database.')
+        return tmp_account
 
     def create_account(self, account: Account) -> Account:
         """
@@ -118,3 +136,22 @@ class AccountDAO(DataAccessObjectInterface):
         super().commit_changes()
         logging.info(f'Deleted {username} from accounts table in database.')
         return True        
+
+    def delete_account_by_id(self, accountID: int) -> bool:
+        """
+            This method will delete an account with the specified id.
+
+            This method will return a boolean True value if transaction was successful, raise an exception otherwise.
+        """
+        try:
+            cursor: MySQLCursor = super().get_cursor()
+            query = f'DELETE FROM accounts WHERE accountID={accountID}'
+            cursor.execute(query)
+
+        except mysql.connector.Error as Err:
+            logging.error(Err.msg)
+            return False
+        
+        super().commit_changes()
+        logging.info(f'Deleted account with ID: {accountID} from accounts table in database.')
+        return True    

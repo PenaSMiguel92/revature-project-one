@@ -13,6 +13,4 @@ class Shop_Order():
     lastName: str
     medicationName: str
     medicationCost: float
-    quantity: int
-    totalAmount: float
     

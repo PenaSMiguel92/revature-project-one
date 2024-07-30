@@ -37,3 +37,10 @@ class DoctorServiceInterface(MenuBaseClass):
             This method is called when user wants to logoff.
         """
         ...
+
+    @abstractmethod
+    def process_input(self) -> None:
+        """
+            Method for processing user input.
+        """
+        ...

@@ -53,8 +53,5 @@ class AdminServiceInterface(MenuBaseClass):
         ...
 
     @abstractmethod
-    def logoff(self) -> None:
-        """
-            This method is called when user wants to logoff.
-        """
+    def process_input(self) -> None:
         ...

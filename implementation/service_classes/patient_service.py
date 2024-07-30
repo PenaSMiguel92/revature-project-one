@@ -3,6 +3,7 @@ from interface.input_validation_interface import InputValidation
 
 from implementation.data_access_classes.prescription_dao import PrescriptionDAO
 from implementation.data_access_classes.orders_dao import OrdersDAO
+from implementation.data_access_classes.medication_dao import MedicationDAO
 
 from implementation.data_model_classes.account import Account
 from implementation.data_model_classes.medication import Medication
@@ -25,9 +26,11 @@ class PatientService(InputValidation, PatientServiceInterface):
         self.current_state = patient_service_state.INITIAL_STATE
         self.prescriptions_dao: PrescriptionDAO = PrescriptionDAO()
         self.orders_dao: OrdersDAO = OrdersDAO()
+        self.medication_dao: MedicationDAO = MedicationDAO()
 
         self.prescriptions: list[Prescription] = self.prescriptions_dao.get_prescriptions_by_patientID(current_account.accountID)
         self.orders: list[Shop_Order] = self.orders_dao.get_orders_by_username(current_account.accountUsername)
+        self.medications: list[Medication] = self.medication_dao.get_all_medications()
 
         self.current_account = current_account
      
@@ -36,6 +39,65 @@ class PatientService(InputValidation, PatientServiceInterface):
     
     def get_state(self) -> int:
         return self.current_state
+    
+    
+
+    def display_orders(self) -> bool:
+        if len(self.orders) < 1:
+            print('\nYou do not have any orders at this time.')
+            self.current_state = patient_service_state.INITIAL_STATE
+            return True
+        
+        print('\nThese are all your orders: ')
+        result_str = ''
+        for order in self.orders:
+            result_str += f'Order ID: {order.orderID} - Product: {order.medicationName} - Total: ${order.medicationCost} \n'
+
+        print(result_str)
+
+    def get_medication_from_list(self, med_id: int,  med_list: list[Medication]) -> Medication:
+        target_med = filter(lambda item: item.medicationID == med_id, med_list)
+        return target_med[0]
+    
+    def display_prescriptions(self) -> bool:
+        if len(self.prescriptions) < 1:
+            print('\nYou do not have any prescriptions at this time.')
+            self.current_state = patient_service_state.INITIAL_STATE
+            return True
+        
+        print('\nThese are the medications prescribed to you: ')
+        result_str = ''
+        valid_medIDs = set()
+        for prescription in self.prescriptions:
+            result_str += f'ID: {prescription.prescriptionID} - {prescription.medicationName}\n'
+            valid_medIDs.add(prescription.prescriptionID)
+
+        while True:
+            try: 
+                print('\nWhich would you like to purchase? (separate IDs by spaces)')
+                user_input = input('>>>').split()
+                medication_list: list[Medication] = []
+                one_or_more_invalid = False
+                for input_value in user_input:
+                    if not self.validate_input(user_input, integer_input=True):
+                        one_or_more_invalid = True
+                        continue
+                    if int(user_input) not in valid_medIDs:
+                        one_or_more_invalid = True
+                        continue
+                    medication_list.append(self.get_medication_from_list(input_value, self.medications))
+                        
+                if one_or_more_invalid:
+                    raise PatientMenuSelectionInvalid('One or more inputs were invalid, please make sure to input valid IDs.')
+
+                if self.orders_dao.create_orders_from_list(self.current_account, medication_list):
+                    break
+            except PatientMenuSelectionInvalid as err:
+                print(err.message)
+
+        print('Orders successfully submitted.')
+        self.current_state = patient_service_state.INITIAL_STATE
+        return True
     
     def process_input(self, input: str) -> None:
         match (input):
@@ -46,20 +108,6 @@ class PatientService(InputValidation, PatientServiceInterface):
             case 'C':
                 self.current_state = patient_service_state.CLOSING_STATE
 
-    def display_orders(self) -> bool:
-        ...
-    
-    
-    def display_prescriptions(self) -> bool:
-        ...
-
-    
-    def logoff(self) -> None:
-        self.prescriptions_dao.close_connection()
-        self.orders_dao.close_connection()
-        
-
-        
     def display(self) -> bool:
         print('\nWould you like to make or modify an order? ')
         print('A. Make an order.')

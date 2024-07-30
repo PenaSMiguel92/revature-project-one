@@ -27,14 +27,13 @@ A store where Patients can login, see their prescriptions, buy refills, and see 
     - prescriptions should hold records of all prescriptions, their primary key id, doctor id foreign key, patient id foreign key, medication id
     - roles should hold records of all possible roles, their primary key id, role name (Patient, Doctor, Admin)
     - orders should hold records of all orders, including their primary key id, user id foreign key, amount, medication id foreign key, and date.
-- The login feature will be handled by a control object that creates and manages users and their roles. Passwords will be saved as a hash, which will only match to correct passwords. It will use a similar structure to the PEP project, but without the API stuff.
+- The login feature will be handled by a control object that creates and manages users and their roles.
 - Each class should have access to a Log method that handles logging events automatically, similar to input_validation from project-zero.
 
 ## Tech Stack:
     Python 3.12.4
         - dataclasses module for making a codebase similar to Java when working with databases.
         - mysql.connector for connecting to mysql database.
-        - tkinter (GUI library, can be implemented later, focus on CLI)
         - requests module for API calls, just once.
     VS Code
     MySQL

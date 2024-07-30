@@ -67,7 +67,7 @@ class PrescriptionDAO(DataAccessObjectInterface):
         logging.info(f'All prescriptions by doctor ID: {doctorID} were retrieved successfully.')
         return prescriptions
     
-    def create_order(self, doctor: Account, patient: Account, medication: Medication) -> bool:
+    def create_prescription(self, doctor: Account, patient: Account, medication: Medication) -> bool:
         """
             This method will craate a prescription and insert it into the prescriptions table for saving.
 
@@ -82,6 +82,20 @@ class PrescriptionDAO(DataAccessObjectInterface):
 
         super().commit_changes()
         logging.info(f'Created prescription by {doctor.lastName} to {patient.lastName} the medication {medication.medicationName} and saved to the database.')
+        return True
+    
+    def create_prescriptions_from_list(self, doctor: Account, patient: Account, med_list: list[Medication]) -> bool:
+        cursor: MySQLCursor = super().get_cursor()
+        query_str = 'INSERT INTO prescriptions (prescriptionID, prescribedBy, prescribedTo, medicationID) VALUES '
+        for index, med in enumerate(med_list):
+            if index == len(med_list) - 1:
+                query_str += f'(DEFAULT, {doctor.accountID}, {patient.accountID}, {med.medicationID});'
+                continue
+            query_str += f'(DEFAULT, {doctor.accountID}, {patient.accountID}, {med.medicationID}),'
+        cursor.execute(query_str)
+
+        super().commit_changes()
+        logging.info(f'Created prescriptions by {doctor.lastName} to {patient.lastName} a list of medications and saved to the database.')
         return True
     
     def update_prescription(self, prescription: Prescription, medication: Medication) -> bool:

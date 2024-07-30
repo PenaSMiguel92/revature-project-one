@@ -35,11 +35,5 @@ class PatientServiceInterface(MenuBaseClass):
         """
         ...
 
-    @abstractmethod
-    def logoff(self) -> None:
-        """
-            This method is called when user wants to logoff.
-        """
-        ...
 
     
