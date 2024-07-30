@@ -79,13 +79,13 @@ class PatientService(InputValidation, PatientServiceInterface):
                 medication_list: list[Medication] = []
                 one_or_more_invalid = False
                 for input_value in user_input:
-                    if not self.validate_input(user_input, integer_input=True):
+                    if not self.validate_input(input_value, integer_input=True):
                         one_or_more_invalid = True
                         continue
-                    if int(user_input) not in valid_medIDs:
+                    if int(input_value) not in valid_medIDs:
                         one_or_more_invalid = True
                         continue
-                    medication_list.append(self.get_medication_from_list(input_value, self.medications))
+                    medication_list.append(self.get_medication_from_list(int(input_value), self.medications))
                         
                 if one_or_more_invalid:
                     raise PatientMenuSelectionInvalid('One or more inputs were invalid, please make sure to input valid IDs.')

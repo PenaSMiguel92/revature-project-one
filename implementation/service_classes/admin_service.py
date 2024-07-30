@@ -89,14 +89,56 @@ class AdminService(InputValidation, AdminServiceInterface):
 
         self.current_state = admin_service_state.INITIAL_STATE
         return True
-            
-    
     
     def display_orders(self) -> None:
-        ...
+        print('\nThe following are all the orders in the database: ')
+        # valid_IDs = set()
+        result_str = ''
+        for order in self.shop_orders:
+            result_str += f'{order.orderID}. Username: {order.username} - Name: {order.firstName} {order.lastName} - Medication: {order.medicationName} - Total Amount: ${order.medicationCost}\n'
+            # valid_IDs.add(account.accountID)
+        print(result_str)
+        submenu_option = ''
+        while True:
+            try: 
+                print('Choose an option: ')
+                print('A. Modify orders - NOT IMPLEMENTED')
+                print('B. Cancel')
+                submenu_option = input('>>>').upper()
+                if not self.validate_input(submenu_option, char_input=True, valid_input='B'):
+                    raise AdminMenuSelectionInvalid('Please select a valid submenu option.')
+                break
+            except AdminMenuSelectionInvalid as err:
+                print(err.message)
+        
+        if submenu_option == 'B':
+            self.current_state = admin_service_state.INITIAL_STATE
+            return True
 
     def display_medications(self) -> None:
-        ...
+        print('\nThe following are all the medications in the database: ')
+        # valid_IDs = set()
+        result_str = ''
+        for medication in self.medications:
+            result_str += f'{medication.medicationID}. Name: {medication.medicationName} - Cost: ${medication.medicationCost}\n'
+            # valid_IDs.add(account.accountID)
+        print(result_str)
+        submenu_option = ''
+        while True:
+            try: 
+                print('Choose an option: ')
+                print('A. Modify medications - NOT IMPLEMENTED')
+                print('B. Cancel')
+                submenu_option = input('>>>').upper()
+                if not self.validate_input(submenu_option, char_input=True, valid_input='B'):
+                    raise AdminMenuSelectionInvalid('Please select a valid submenu option.')
+                break
+            except AdminMenuSelectionInvalid as err:
+                print(err.message)
+        
+        if submenu_option == 'B':
+            self.current_state = admin_service_state.INITIAL_STATE
+            return True
 
     def apply_role(self, accountID) -> None:
         submenu_option = ''
@@ -118,15 +160,16 @@ class AdminService(InputValidation, AdminServiceInterface):
             self.current_state = admin_service_state.INITIAL_STATE
             return 
         
-        new_account = self.account_dao.get_account_by_id(accountID)
-        match submenu_option:
-            case 'A':
-                new_account.roleName = 'Admin'
-            case 'B':
-                new_account.roleName = 'Patient'
-            case 'C':
-                new_account.roleName = 'Doctor'
-
+        old_account = self.account_dao.get_account_by_id(accountID)
+        roleUse = ''
+        if submenu_option == 'A':
+            roleUse = 'Admin'
+        elif submenu_option == 'B':
+            roleUse = 'Patient'
+        else:
+            roleUse = 'Doctor'
+        
+        new_account = Account(old_account.accountID, old_account.accountUsername, old_account.accountPassword, old_account.firstName, old_account.lastName, old_account.balance, roleUse)
         self.account_dao.update_account(new_account)
         
 
@@ -143,7 +186,7 @@ class AdminService(InputValidation, AdminServiceInterface):
         
     def display(self) -> None:
         print('\nWhat would you like to do? ')
-        print('A. Modify medications.')
+        print('A. View all medications.')
         print('B. Modify or View accounts.')
         print('C. View all orders.')
         print('D. Sign out.')

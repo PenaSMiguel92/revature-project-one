@@ -44,21 +44,63 @@ class DoctorService(InputValidation, DoctorServiceInterface):
    
     
     def get_medication_from_list(self, med_id: int,  med_list: list[Medication]) -> Medication:
-        target_med = filter(lambda item: item.medicationID == med_id, med_list)
+        target_med = list(filter(lambda item: item.medicationID == med_id, med_list))
         return target_med[0]
     
     def get_account_from_list(self, accountID: int, account_list: list[Account]) -> Account:
-        target_account = filter(lambda item: item.accountID == accountID, account_list)
+        target_account = list(filter(lambda item: item.accountID == accountID, account_list))
         return target_account[0]
     
     def display_prescriptions(self) -> None:
+        print('\nThe following are all of your patients that received a prescription in the database: ')
+        # valid_IDs = set()
+        result_str = ''
+        for prescription in self.prescriptions:
+            result_str += f'{prescription.prescriptionID}. Username: {prescription.prescribedToUsername} - Name: {prescription.prescribedToFirstName} {prescription.prescribedToLastName} - Medication Name: {prescription.medicationName}\n'
+            # valid_IDs.add(account.accountID)
+        print(result_str)
+        submenu_option = ''
+        while True:
+            try: 
+                print('Choose an option: ')
+                print('A. Modify prescriptions - NOT IMPLEMENTED')
+                print('B. Cancel')
+                submenu_option = input('>>>').upper()
+                if not self.validate_input(submenu_option, char_input=True, valid_input='B'):
+                    raise DoctorMenuSelectionInvalid('Please select a valid submenu option.')
+                break
+            except DoctorMenuSelectionInvalid as err:
+                print(err.message)
         
-        ...
+        if submenu_option == 'B':
+            self.current_state = doctor_service_state.INITIAL_STATE
+            return True
 
     
     def display_medications(self) -> None:
-       
-        ...
+        print('\nThe following are all the medications in the database: ')
+        # valid_IDs = set()
+        result_str = ''
+        for medication in self.medications:
+            result_str += f'{medication.medicationID}. Name: {medication.medicationName} - Cost: ${medication.medicationCost}\n'
+            # valid_IDs.add(account.accountID)
+        print(result_str)
+        submenu_option = ''
+        while True:
+            try: 
+                print('Choose an option: ')
+                print('A. Modify medications - NOT IMPLEMENTED')
+                print('B. Cancel')
+                submenu_option = input('>>>').upper()
+                if not self.validate_input(submenu_option, char_input=True, valid_input='B'):
+                    raise DoctorMenuSelectionInvalid('Please select a valid submenu option.')
+                break
+            except DoctorMenuSelectionInvalid as err:
+                print(err.message)
+        
+        if submenu_option == 'B':
+            self.current_state = doctor_service_state.INITIAL_STATE
+            return True
     
     def display_patients(self) -> None:
         print('\nThe following are all the patients in the database: ')
@@ -113,13 +155,13 @@ class DoctorService(InputValidation, DoctorServiceInterface):
                 medication_list: list[Medication] = []
                 one_or_more_invalid = False
                 for input_value in user_input:
-                    if not self.validate_input(user_input, integer_input=True):
+                    if not self.validate_input(input_value, integer_input=True):
                         one_or_more_invalid = True
                         continue
-                    if int(user_input) not in valid_medIDs:
+                    if int(input_value) not in valid_medIDs:
                         one_or_more_invalid = True
                         continue
-                    medication_list.append(self.get_medication_from_list(input_value, self.medications))
+                    medication_list.append(self.get_medication_from_list(int(input_value), self.medications))
                         
                 if one_or_more_invalid:
                     raise DoctorMenuSelectionInvalid('One or more inputs were invalid, please make sure to input valid IDs.')
@@ -148,8 +190,8 @@ class DoctorService(InputValidation, DoctorServiceInterface):
     def display(self) -> None:
         print('\nWhat would you like to do? ')
         print('A. Prescribe a medication')
-        print('B. View my patients or modify prescriptions')
-        print('C. View or modify medications')
+        print('B. View my patients')
+        print('C. View all medications')
         print('D. Sign out')
         while self.current_state == doctor_service_state.INITIAL_STATE:
             try:

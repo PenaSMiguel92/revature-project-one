@@ -64,6 +64,7 @@ class AccountService(InputValidation, AccountServiceInterface):
             self.current_state = account_service_state.INITIAL_STATE
             return False
         
+        self.account_greeting()
         self.current_state = account_service_state.LOADED_USER_STATE
         return True
     
@@ -79,6 +80,7 @@ class AccountService(InputValidation, AccountServiceInterface):
         pasword_input = ''
         firstname_input = ''
         lastname_input = ''
+        balance_input: float = 0.00 
 
         while True:
             try:

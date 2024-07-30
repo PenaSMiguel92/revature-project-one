@@ -84,7 +84,6 @@ class MainMenu(InputValidation, MenuInterface):
                     print(msg.message)
         
         if self.account_service.get_state() == account_service_state.LOADED_USER_STATE:
-            self.account_service.account_greeting()
             account_role = self.account_service.get_account_role()
             match account_role:
                 case 'Admin':
@@ -102,20 +101,80 @@ class MainMenu(InputValidation, MenuInterface):
     def admin_submenu(self) -> None:
         if self.admin_service == None:
             self.admin_service = AdminService(self.account_service.current_account)
-        
+
+        if self.admin_service.get_state() == admin_service_state.CLOSING_STATE:
+            print('Are you sure you want to sign out? (Y/N)')
+            while True:
+                try:
+                    user_input = input('>>>').upper()
+                    if not self.validate_input(user_input, char_input = True, valid_input = 'YN'):
+                        raise MenuSelectionInvalidException("Please enter a valid menu option.")
+                    if user_input == 'Y':
+                        self.current_state = menu_state.INITIAL_STATE
+                        self.account_service.current_account = None
+                        self.account_service.set_state(account_service_state.INITIAL_STATE)
+                        self.admin_service = None
+                    else:
+                        self.current_state = menu_state.INITIAL_STATE
+                        self.patient_service.set_state(patient_service_state.INITIAL_STATE)
+
+                    return
+                except MenuSelectionInvalidException as msg:
+                    print(msg.message)
+
         if self.admin_service.run():
             self.reset_state()
     
     def patient_submenu(self) -> None:
         if self.patient_service == None:
             self.patient_service = PatientService(self.account_service.current_account)
-        
+
+        if self.patient_service.get_state() == patient_service_state.CLOSING_STATE:
+            print('Are you sure you want to sign out? (Y/N)')
+            while True:
+                try:
+                    user_input = input('>>>').upper()
+                    if not self.validate_input(user_input, char_input = True, valid_input = 'YN'):
+                        raise MenuSelectionInvalidException("Please enter a valid menu option.")
+                    if user_input == 'Y':
+                        self.current_state = menu_state.INITIAL_STATE
+                        self.account_service.current_account = None
+                        self.account_service.set_state(account_service_state.INITIAL_STATE)
+                        self.patient_service = None
+                    else:
+                        self.current_state = menu_state.INITIAL_STATE
+                        self.patient_service.set_state(patient_service_state.INITIAL_STATE)
+
+                    return
+                except MenuSelectionInvalidException as msg:
+                    print(msg.message)
+
         if self.patient_service.run():
             self.reset_state()
     
     def doctor_submenu(self) -> None:
         if self.doctor_service == None:
             self.doctor_service = DoctorService(self.account_service.current_account)
+
+        if self.doctor_service.get_state() == doctor_service_state.CLOSING_STATE:
+            print('Are you sure you want to sign out? (Y/N)')
+            while True:
+                try:
+                    user_input = input('>>>').upper()
+                    if not self.validate_input(user_input, char_input = True, valid_input = 'YN'):
+                        raise MenuSelectionInvalidException("Please enter a valid menu option.")
+                    if user_input == 'Y':
+                        self.current_state = menu_state.INITIAL_STATE
+                        self.account_service.current_account = None
+                        self.account_service.set_state(account_service_state.INITIAL_STATE)
+                        self.doctor_service = None
+                    else:
+                        self.current_state = menu_state.INITIAL_STATE
+                        self.doctor_service.set_state(patient_service_state.INITIAL_STATE)
+
+                    return
+                except MenuSelectionInvalidException as msg:
+                    print(msg.message)
 
         if self.doctor_service.run():
             self.reset_state()
