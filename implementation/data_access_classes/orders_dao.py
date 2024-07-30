@@ -107,7 +107,6 @@ class OrdersDAO(DataAccessObjectInterface):
             query_list = list(query)
             query_list[-1] = ';'
             query = ''.join(query_list)
-        print(query)
         cursor.execute(query)
 
         query_start = f'UPDATE accounts SET balance={patient.balance}, accountRole=2'
