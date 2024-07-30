@@ -133,8 +133,9 @@ class OrdersDAO(DataAccessObjectInterface):
             account_dao: AccountDAO = AccountDAO()
 
             patient: Account = account_dao.get_account_by_username(order.username)
-            patient.balance += order.medicationCost
-            account_dao.update_account(patient)
+            cur_balance = patient.balance
+            cur_balance += order.medicationCost
+            account_dao.update_account(Account(patient.accountID, patient.accountUsername, patient.accountPassword, patient.firstName, patient.lastName, cur_balance, patient.roleName))
             query = f'DELETE FROM orders WHERE orderID={order_id}'
             cursor.execute(query)
         except mysql.connector.Error as Err:
@@ -144,4 +145,5 @@ class OrdersDAO(DataAccessObjectInterface):
         
         super().commit_changes()
         logging.info(f'Deleted order with ID: {order_id} from orders table and refunded ${order.medicationCost} to {patient.accountUsername} in database.')
+        print(f'\nYour balance is now: ${cur_balance}')
         return True  
