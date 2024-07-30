@@ -30,6 +30,24 @@ class AccountDAO(DataAccessObjectInterface):
 
         logging.info('All accounts retrieved from database successfully.')
         return accounts
+    
+    def get_all_patients(self) -> list[Account]:
+        """
+            This method will cache all accounts from the accounts table that are patients to a list.
+            
+            This method should only be accessible by an doctor, and run only once per session.
+
+            This method will return a boolean True value if transaction was successful, raise an exception otherwise.
+        """
+        cursor: MySQLCursor = super().get_cursor() 
+        query = 'SELECT a.accountID, a.accountUsername, a.accountPassword, a.firstName, a.lastName, a.balance, r.roleName FROM accounts AS a JOIN roles as r ON a.accountRole = r.roleID WHERE r.roleName=\'Patient\';'
+        cursor.execute(query)
+        accounts: list[Account] = []
+        for _, row in enumerate(cursor):
+            accounts.append(Account(int(row[0]), row[1], row[2], row[3], row[4], float(row[5]), row[6]))
+
+        logging.info('All patient accounts retrieved from database successfully.')
+        return accounts
 
     def get_account_by_username(self, username: str) -> Account:
         """

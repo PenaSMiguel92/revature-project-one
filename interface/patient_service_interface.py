@@ -11,21 +11,24 @@ class PatientServiceInterface(MenuBaseClass):
         ...
     
     @abstractmethod
-    def view_orders(self) -> None:
+    def display_orders(self) -> None:
+        """
+            Displays all orders by this patient, and provides an interface for orders.
+        """
         ...
     
     @abstractmethod
-    def delete_order(self) -> None:
-        ...
-    
-    @abstractmethod
-    def create_order(self) -> None:
-        ...
-    
-    @abstractmethod
-    def edit_order(self) -> None:
+    def display_prescriptions(self) -> None:
+        """
+            Displays all prescribed medications to this patient, and provides an interface for purchasing and creating orders.
+        """
         ...
 
     @abstractmethod
-    def view_prescriptions(self) -> None:
+    def logoff(self) -> None:
+        """
+            This method is called when user wants to logoff.
+        """
         ...
+
+    

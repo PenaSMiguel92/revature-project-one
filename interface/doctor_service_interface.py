@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from interface.menu_baseclass import MenuBaseClass
 
-class PatientServiceInterface(MenuBaseClass):
+class DoctorServiceInterface(MenuBaseClass):
     @abstractmethod
     def set_state(self, state_value: int) -> None:
         ...
@@ -11,21 +11,29 @@ class PatientServiceInterface(MenuBaseClass):
         ...
     
     @abstractmethod
-    def view_prescriptions_by_patientID(self) -> None:
-        ...
-    
-    @abstractmethod
-    def delete_prescription(self) -> None:
-        ...
-    
-    @abstractmethod
-    def create_prescription(self) -> None:
-        ...
-    
-    @abstractmethod
-    def edit_prescription(self) -> None:
+    def display_prescriptions(self) -> None:
+        """
+            This method displays all prescriptions by this doctor, and provides an interface for modifying prescriptions.
+        """
         ...
 
     @abstractmethod
-    def view_all_prescriptions(self) -> None:
+    def display_medications(self) -> None:
+        """
+            This method displays all medications and provides an interface for choosing a medication for prescribing.
+        """
+        ...
+    
+    @abstractmethod
+    def display_patients(self) -> None:
+        """
+            This method displays all accounts that are patients, and provides an interface for prescribing.
+        """
+        ...
+
+    @abstractmethod
+    def logoff(self) -> None:
+        """
+            This method is called when user wants to logoff.
+        """
         ...

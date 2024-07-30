@@ -6,7 +6,7 @@ class MenuBaseClass(ABC):
         """
             This method will display the menu, and through polymorphism, the functionality will vary.
         """
-        pass
+        ...
 
     @abstractmethod
     def run(self) -> None:
@@ -15,4 +15,4 @@ class MenuBaseClass(ABC):
             
             The submenu run methods should return a boolean stating whether the controller is still running.
         """
-        pass
+        ...

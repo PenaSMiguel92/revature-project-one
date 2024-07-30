@@ -7,14 +7,14 @@ class AdminServiceInterface(MenuBaseClass):
         """
             This method must be used to set the state of this menu.
         """
-        pass
+        ...
 
     @abstractmethod
     def get_state(self) -> int:
         """
             This method is used to get the state of this menu.
         """
-        pass
+        ...
     
     @abstractmethod
     def display_accounts(self) -> None:
@@ -24,15 +24,24 @@ class AdminServiceInterface(MenuBaseClass):
             penamiguel -> Patient
             drhousemd -> Doctor
             ownermiguel -> Admin
+
+            It will also provide an interface for modifying accounts.
         """
-        pass
+        ...
     
     @abstractmethod
     def display_orders(self) -> None:
         """
-            This method will display all orders.  
+            This method will display all orders and provide an interface for modifying orders.  
         """
-        pass
+        ...
+
+    @abstractmethod
+    def display_medications(self) -> None:
+        """
+            This method will display all medications and provide an interface for modifying medications.  
+        """
+        ...
 
     @abstractmethod
     def apply_role(self) -> None:
@@ -41,5 +50,11 @@ class AdminServiceInterface(MenuBaseClass):
 
             For example, an admin will be able to apply the Doctor role to a user, which grants them the ability to create prescriptions.
         """
-        pass
+        ...
 
+    @abstractmethod
+    def logoff(self) -> None:
+        """
+            This method is called when user wants to logoff.
+        """
+        ...

@@ -8,6 +8,12 @@ from custom_exceptions.menu_selection_invalid import MenuSelectionInvalidExcepti
 
 from implementation.service_classes.account_service import AccountService
 from implementation.service_classes.account_service import account_service_state
+from implementation.service_classes.admin_service import AdminService
+from implementation.service_classes.admin_service import admin_service_state
+from implementation.service_classes.doctor_service import DoctorService
+from implementation.service_classes.doctor_service import doctor_service_state
+from implementation.service_classes.patient_service import PatientService
+from implementation.service_classes.patient_service import patient_service_state
 
 from enum import Enum
 
@@ -35,8 +41,9 @@ class MainMenu(InputValidation, MenuInterface):
     def __init__(self):
         self.current_state = menu_state.INITIAL_STATE
         self.account_service = None
-        # self.current_account = None
-        # self.current_biostatHandler = None
+        self.admin_service = None
+        self.doctor_service = None
+        self.patient_service = None
     
     def set_state(self, state_value: int) -> None:
         self.current_state = state_value
@@ -52,6 +59,8 @@ class MainMenu(InputValidation, MenuInterface):
         """
         self.current_state = menu_state.INITIAL_STATE
     
+    # Polymorphism allows me to repeat the same code for different objects that do different things.
+
     def account_submenu(self) -> None:
         if self.account_service == None:
             self.account_service = AccountService()
@@ -60,17 +69,25 @@ class MainMenu(InputValidation, MenuInterface):
             self.reset_state()
 
     def admin_submenu(self) -> None:
-        ...
+        if self.admin_service == None:
+            self.admin_service = AdminService(self.account_service.current_account)
+        
+        if self.admin_service.run():
+            self.reset_state()
     
     def patient_submenu(self) -> None:
-        ...
+        if self.patient_service == None:
+            self.patient_service = PatientService(self.account_service.current_account)
+        
+        if self.patient_service.run():
+            self.reset_state()
     
     def doctor_submenu(self) -> None:
-        ...
-    
-    # def reset_data(self) -> None:
-    #     self.current_profile = None
-    #     self.current_biostatHandler = None
+        if self.doctor_service == None:
+            self.doctor_service = DoctorService(self.account_service.current_account)
+
+        if self.doctor_service.run():
+            self.reset_state()
 
     def display(self) -> None:
         self.current_state = menu_state.ACCOUNT_SUBMENU_STATE
@@ -119,23 +136,4 @@ class MainMenu(InputValidation, MenuInterface):
                 self.patient_submenu()
             case menu_state.DOCTOR_SUBMENU_STATE:
                 self.doctor_submenu()
-        #     case menu_state.CREATING_PROFILE_STATE:
-        #         self.create_profile()
-        #     case menu_state.LOADING_PROFILE_STATE:
-        #         self.load_profile()
-        #     case menu_state.SHOW_HISTORY_STATE:
-        #         if self.current_biostatHandler == None: 
-        #             self.load_data()
-
-        #         self.show_history()
-        #     case menu_state.REPORT_BIOSTATS_STATE:
-        #         if self.current_biostatHandler == None:
-        #             self.load_data()
-                
-        #         self.report_biostats()
-        #         if self.current_biostatHandler != None and self.current_profile != None:
-        #             filename = self.current_profile.get_filename()
-        #             self.current_biostatHandler.save_data(filename)
-        #     case _: #The only other state it can be is menu_state.CLOSING_STATE
-        #         print("Closing tracker. Have a nice day :)") 
             
