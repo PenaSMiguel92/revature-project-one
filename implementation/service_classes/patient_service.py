@@ -11,6 +11,7 @@ from implementation.data_model_classes.prescription import Prescription
 from implementation.data_model_classes.shop_order import Shop_Order
 
 from custom_exceptions.patient_menu_selection_invalid import PatientMenuSelectionInvalid
+from custom_exceptions.order_invalid import OrderInvalid
 
 from enum import Enum
 
@@ -40,7 +41,24 @@ class PatientService(InputValidation, PatientServiceInterface):
     def get_state(self) -> int:
         return self.current_state
     
-    
+    def display_remove_orders(self, valid_ids:set[int]) -> None:
+        orderid_input = ''
+        while True:
+            try:
+                print('Please enter the order\'s id: ')
+                orderid_input = input('>>>')
+                if not self.validate_input(orderid_input, integer_input=True):
+                    raise OrderInvalid('Order id must be numerical.')
+                
+                if int(orderid_input) not in valid_ids:
+                    raise OrderInvalid('Order id must be in the list above.')
+
+                break
+            except OrderInvalid as err:
+                print(err.message)
+
+        self.orders_dao.delete_order_by_id(int(orderid_input))
+        print('Order deleted successfully.')
 
     def display_orders(self) -> bool:
         self.orders = self.orders_dao.get_orders_by_username(self.current_account.accountUsername)
@@ -51,18 +69,20 @@ class PatientService(InputValidation, PatientServiceInterface):
         
         print('\nThese are all your orders: ')
         result_str = ''
+        valid_orderIDs = set()
         for order in self.orders:
             result_str += f'Order ID: {order.orderID} - Product: {order.medicationName} - Total: ${order.medicationCost} \n'
+            valid_orderIDs.add(order.orderID)
 
         print(result_str)
         submenu_option = ''
         while True:
             try: 
                 print('Choose an option: ')
-                print('A. Modify orders - NOT IMPLEMENTED')
-                print('B. Cancel')
+                print('A. Cancel an order')
+                print('B. Exit')
                 submenu_option = input('>>>').upper()
-                if not self.validate_input(submenu_option, char_input=True, valid_input='B'):
+                if not self.validate_input(submenu_option, char_input=True, valid_input='AB'):
                     raise PatientMenuSelectionInvalid('Please select a valid submenu option.')
                 break
             except PatientMenuSelectionInvalid as err:
@@ -71,11 +91,16 @@ class PatientService(InputValidation, PatientServiceInterface):
         if submenu_option == 'B':
             self.current_state = patient_service_state.INITIAL_STATE
             return True
+        elif submenu_option == 'A':
+            self.display_remove_orders(valid_orderIDs)
+
+        self.current_state = patient_service_state.INITIAL_STATE
+        return True
 
     def get_medication_from_list(self, med_id: int,  med_list: list[Medication]) -> Medication:
         target_med = list(filter(lambda item: item.medicationID == med_id, med_list))
         return target_med[0]
-    
+
     def display_prescriptions(self) -> bool:
         self.prescriptions = self.prescriptions_dao.get_prescriptions_by_patientID(self.current_account.accountID)
         if len(self.prescriptions) < 1:
