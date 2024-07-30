@@ -19,5 +19,19 @@ class InputValidation():
             return input_value.isdigit()
         elif kwargs.get('string_input') != None:
             return input_value.isalpha() and len(input_value) > 2
+        elif kwargs.get('credential_input') != None:
+            alpha = False
+            numeric = False
+            space = False
+            for char in input_value:
+                if not alpha:
+                    alpha = char.isalpha()
+                if not numeric:
+                    numeric = char.isdigit()
+                if not space:
+                    space = char.isspace()
+            print(alpha, numeric, space)
+            valid = (alpha and numeric and not space) #contains at least a letter and a number, but cannot have any whitespace.
+            return valid and len(input_value) > 4
         else:
             return False

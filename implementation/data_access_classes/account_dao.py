@@ -45,7 +45,7 @@ class AccountDAO(DataAccessObjectInterface):
         accounts: list[Account] = []
         for _, row in enumerate(cursor):
             accounts.append(Account(int(row[0]), row[1], row[2], row[3], row[4], float(row[5]), row[6]))
-
+        
         logging.info('All patient accounts retrieved from database successfully.')
         return accounts
 
@@ -68,18 +68,19 @@ class AccountDAO(DataAccessObjectInterface):
         logging.info('Account retrieved from database.')
         return tmp_account
 
-    def create_account(self, account: Account) -> bool:
+    def create_account(self, account: Account) -> Account:
         """
             This method will insert specified account into accounts table for saving.
 
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
         cursor: MySQLCursor = super().get_cursor()
-        query_start = f'INSERT INTO accounts (accountID, accountUsername, accountPassword, firstName, lastName, balance, roleID) VALUES '
+        query_start = f'INSERT INTO accounts (accountID, accountUsername, accountPassword, firstName, lastName, balance, accountRole) VALUES '
         query_end = f'(DEFAULT, \'{account.accountUsername}\', \'{account.accountPassword}\', \'{account.firstName}\', \'{account.lastName}\', 0.00, 2)'
         cursor.execute(query_start + query_end)
+        super().commit_changes()
         logging.info('Account created and saved to database.')
-        return True
+        return self.get_account_by_username(account.accountUsername)
 
     def update_account(self, account: Account) -> bool:
         """
@@ -95,6 +96,7 @@ class AccountDAO(DataAccessObjectInterface):
         query_start = f'UPDATE accounts SET balance={account.balance}, roleID={new_roleID}'
         query_end = f' WHERE accountID={account.accountID};'
         cursor.execute(query_start + query_end)
+        super().commit_changes()
         logging.info('Account attributes updated.')
         return True
 
@@ -113,5 +115,6 @@ class AccountDAO(DataAccessObjectInterface):
             logging.error(Err.msg)
             return False
         
+        super().commit_changes()
         logging.info(f'Deleted {username} from accounts table in database.')
         return True        

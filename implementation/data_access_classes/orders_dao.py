@@ -1,8 +1,8 @@
 from interface.data_access_object_interface import DataAccessObjectInterface
-from data_model_classes.account import Account
-from data_access_classes.account_dao import AccountDAO
-from data_model_classes.medication import Medication
-from data_model_classes.shop_order import Shop_Order
+from implementation.data_model_classes.account import Account
+from implementation.data_access_classes.account_dao import AccountDAO
+from implementation.data_model_classes.medication import Medication
+from implementation.data_model_classes.shop_order import Shop_Order
 import logging
 
 import mysql.connector
@@ -73,6 +73,7 @@ class OrdersDAO(DataAccessObjectInterface):
         query_end = '{:.2f});'.format(quantity * medication.medicationCost)
         cursor.execute(query_start + query_mid + query_end)
 
+        super().commit_changes()
         logging.info(f'Created order for {patient.accountUsername} and saved to database.')
         return True
 
@@ -100,5 +101,6 @@ class OrdersDAO(DataAccessObjectInterface):
             logging.error(Err.msg)
             return False
         
+        super().commit_changes()
         logging.info(f'Deleted order with ID: {order_id} from orders table and refunded ${order.totalAmount} to {patient.accountUsername} in database.')
         return True  

@@ -1,3 +1,8 @@
+from custom_exceptions.username_invalid import UsernameInvalid
+from custom_exceptions.password_invalid import PasswordInvalid
+from custom_exceptions.profile_invalid import ProfileInvalid
+from custom_exceptions.balance_invalid import BalanceInvalid
+
 from interface.input_validation_interface import InputValidation
 from interface.account_service_interface import AccountServiceInterface
 from custom_exceptions.account_menu_selection_invalid import AccountMenuSelectionInvalid
@@ -31,12 +36,14 @@ class AccountService(InputValidation, AccountServiceInterface):
             try:
                 username = input('>>>').lower()
                 self.current_account = self.account_dao.get_account_by_username(username)
-                self.current_state = account_service_state.LOADED_USER_STATE
                 break
             except Error as mysql_error:
                 print('Username does not exist. Please enter a valid username.')
+                logging.warning('User attempted to login with invalid credentials.')
+
         if self.current_account == None:
             print('Username does not exist. Please enter a valid username.')
+            logging.warning('User attempted to login with invalid credentials.')
             self.current_state = account_service_state.INITIAL_STATE
             return False
         
@@ -44,7 +51,7 @@ class AccountService(InputValidation, AccountServiceInterface):
         retries = 3
         while retries > 0:
             user_password = input('>>>')
-            if self.current_account.password != user_password:
+            if self.current_account.accountPassword != user_password:
                 print(f"Passwords do not match, please try again ({retries - 1})")
                 retries -= 1
             else:
@@ -52,27 +59,96 @@ class AccountService(InputValidation, AccountServiceInterface):
 
         if retries == 0:
             print('Too many attempts. Try again later.')
+            logging.warning('User attempted to login with invalid credentials.')
             self.current_account = None
             self.current_state = account_service_state.INITIAL_STATE
             return False
         
+        self.current_state = account_service_state.LOADED_USER_STATE
         return True
     
     def account_greeting(self) -> None:
         if self.current_account == None:
             return 
         
-        print(f'\nWelcome back {self.current_account.first_name} {self.current_account.last_name}! What would you like to do? ')
+        print(f'\nWelcome back {self.current_account.firstName} {self.current_account.lastName}!')
 
     def account_register(self) -> None:
         # while self.current_account == None: 
-        print('Please enter a username: ')
-        user_input = input('>>>').lower()
-        check_existing = self.account_dao.get_account_by_username(user_input)
-        if check_existing != None:
-            print('That username is already taken! Please try again.')
-            logging.error('Attempted to create an existing username in database.')
+        username_input = ''
+        pasword_input = ''
+        firstname_input = ''
+        lastname_input = ''
 
+        while True:
+            try:
+                print('Please enter a username: ')
+                username_input = input('>>>').lower()
+                if not self.validate_input(username_input, credential_input=True):
+                    raise UsernameInvalid('Username must not contain whitespace, must be longer than 4 characters, and have some numbers.')
+                
+                check_existing = self.account_dao.get_account_by_username(username_input)
+                if check_existing != None:
+                    raise UsernameInvalid('That username is already taken! Please try again.')
+                
+                break
+            except UsernameInvalid as err:
+                print(err.message)
+        
+        while True:
+            try:
+                print('Please enter a password: ')
+                password_input = input('>>>')
+                print('Please reenter that password: ')
+                password_input_2 = input('>>>')
+                if password_input != password_input_2:
+                    raise PasswordInvalid('Passwords do not match.')
+                
+                if not self.validate_input(password_input, credential_input=True):
+                    raise PasswordInvalid('Password must have more than 4 characters and have no whitespace.')
+                
+                break
+            except PasswordInvalid as err:
+                print(err.message)
+
+        while True:
+            try:
+                print('Please enter your first name: ')
+                firstname_input = input('>>>')
+                if not self.validate_input(firstname_input, string_input=True):
+                    raise ProfileInvalid('First name must have more than 2 characters and be alphabetical.')
+                
+                print('Please enter your last name: ')
+                lastname_input = input('>>>')
+                if not self.validate_input(lastname_input, string_input=True):
+                    raise ProfileInvalid('First name must have more than 2 characters and be alphabetical.')
+
+                break
+            except ProfileInvalid as err:
+                print(err.message)
+
+        while True:
+            try:
+                print('How much will you deposit into your account? ')
+                balance_input = input('>>>')
+                if not self.validate_input(balance_input, integer_input=True):
+                    raise BalanceInvalid('Please enter a number.')
+                if float(balance_input) > 1000:
+                    raise BalanceInvalid('Please enter less than $1,000.')
+                break
+            except BalanceInvalid as err:
+                print(err.message)
+        try:
+            new_account = Account(0, username_input, password_input, firstname_input, lastname_input, balance_input, 2)
+            self.current_account = self.account_dao.create_account(new_account)
+        except Error as mysql_error:
+            logging.error(f'Failed to create an account and save to database. {mysql_error.msg}')
+
+        if self.current_account == None:
+            self.current_state = account_service_state.INITIAL_STATE
+            return False
+        
+        print('Account successfully created!')
         self.current_state = account_service_state.LOADED_USER_STATE
         return True
     

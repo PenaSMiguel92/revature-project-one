@@ -1,5 +1,5 @@
 from interface.data_access_object_interface import DataAccessObjectInterface
-from data_model_classes.medication import Medication
+from implementation.data_model_classes.medication import Medication
 import logging
 import mysql.connector
 from mysql.connector.cursor import MySQLCursor
@@ -55,6 +55,7 @@ class MedicationDAO(DataAccessObjectInterface):
         query_start = f'INSERT INTO medications (medicationID, medicationName, medicationCost) VALUES '
         query_end = f'(DEFAULT, \'{medication.medicationName}\', {medication.medicationCost})'
         cursor.execute(query_start + query_end)
+        super().commit_changes()
         logging.info('Medication created and saved to database.')
         return True
 
@@ -66,6 +67,7 @@ class MedicationDAO(DataAccessObjectInterface):
         query_start = f'UPDATE medications SET medicationName={medication.medicationName}, medicationCost={medication.medicationCost}'
         query_end = f' WHERE medicationID={medication.medicationID};'
         cursor.execute(query_start + query_end)
+        super().commit_changes()
         logging.info(f'Medication with ID: {medication.medicationID} had its attributes updated on the database.')
         return True
 
@@ -84,6 +86,7 @@ class MedicationDAO(DataAccessObjectInterface):
             logging.error(Err.msg)
             return False
         
+        super().commit_changes()
         logging.info(f'Deleted medication with ID: {medicationID} from medications table in database.')
         return True        
 

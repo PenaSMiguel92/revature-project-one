@@ -71,8 +71,11 @@ class DataAccessObjectInterface(object):
         return class_pointer.current_connection        
 
     @classmethod
-    def close_connection(class_pointer) -> bool:
+    def commit_changes(class_pointer) -> None:
         class_pointer.current_connection.commit()
+
+    @classmethod
+    def close_connection(class_pointer) -> bool:
         class_pointer.current_cursor.close()
         class_pointer.current_connection.close()
         logging.info("Database connection closed. Changes commited.")

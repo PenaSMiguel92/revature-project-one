@@ -1,7 +1,7 @@
 from interface.data_access_object_interface import DataAccessObjectInterface
-from data_model_classes.account import Account
-from data_model_classes.medication import Medication
-from data_model_classes.prescription import Prescription
+from implementation.data_model_classes.account import Account
+from implementation.data_model_classes.medication import Medication
+from implementation.data_model_classes.prescription import Prescription
 import logging
 
 import mysql.connector
@@ -80,6 +80,7 @@ class PrescriptionDAO(DataAccessObjectInterface):
         query_end = f'(DEFAULT, {doctor.accountID}, {patient.accountID}, {medication.medicationID});'
         cursor.execute(query_start + query_end)
 
+        super().commit_changes()
         logging.info(f'Created prescription by {doctor.lastName} to {patient.lastName} the medication {medication.medicationName} and saved to the database.')
         return True
     
@@ -95,6 +96,7 @@ class PrescriptionDAO(DataAccessObjectInterface):
         query_start = f'UPDATE prescriptions SET medicationID={medication.medicationID} '
         query_end = f'WHERE prescriptionID={prescription.prescriptionID};'
         cursor.execute(query_start, query_end)
+        super().commit_changes()
         logging.info(f'Prescription of ID: {prescription.prescriptionID} had its medicationID updated to {medication.medicationID} in the database.')
         return True
 
@@ -116,6 +118,7 @@ class PrescriptionDAO(DataAccessObjectInterface):
             logging.error(Err.msg)
             return False
         
+        super().commit_changes()
         logging.info(f'Deleted prescription with ID: {prescription_id} from prescriptions table in database.')
         return True   
 
