@@ -232,7 +232,6 @@ class AdminService(InputValidation, AdminServiceInterface):
         
         old_account = self.account_dao.get_account_by_id(accountID)
         roleUse = ''
-        print(submenu_option)
         if submenu_option == 'A':
             roleUse = 'Admin'
         elif submenu_option == 'B':
@@ -242,6 +241,7 @@ class AdminService(InputValidation, AdminServiceInterface):
         
         new_account = Account(old_account.accountID, old_account.accountUsername, old_account.accountPassword, old_account.firstName, old_account.lastName, old_account.balance, roleUse)
         self.account_dao.update_account(new_account)
+        print('Role updated successfully.')
 
     def process_input(self, input):
         match (input):

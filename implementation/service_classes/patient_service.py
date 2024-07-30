@@ -23,7 +23,6 @@ patient_service_state = Enum('PATIENT_STATE', [
 
 class PatientService(InputValidation, PatientServiceInterface):
     def __init__(self, current_account: Account):
-        print('patient_service created with accountID: ', current_account.accountID)
         self.current_state = patient_service_state.INITIAL_STATE
         self.prescriptions_dao: PrescriptionDAO = PrescriptionDAO()
         self.orders_dao: OrdersDAO = OrdersDAO()
@@ -44,6 +43,7 @@ class PatientService(InputValidation, PatientServiceInterface):
     
 
     def display_orders(self) -> bool:
+        self.orders = self.orders_dao.get_orders_by_username(self.current_account.accountUsername)
         if len(self.orders) < 1:
             print('\nYou do not have any orders at this time.')
             self.current_state = patient_service_state.INITIAL_STATE
@@ -77,6 +77,7 @@ class PatientService(InputValidation, PatientServiceInterface):
         return target_med[0]
     
     def display_prescriptions(self) -> bool:
+        self.prescriptions = self.prescriptions_dao.get_prescriptions_by_patientID(self.current_account.accountID)
         if len(self.prescriptions) < 1:
             print('\nYou do not have any prescriptions at this time.')
             self.current_state = patient_service_state.INITIAL_STATE
@@ -139,8 +140,8 @@ class PatientService(InputValidation, PatientServiceInterface):
         
 
     def display(self) -> bool:
-        self.prescriptions = self.prescriptions_dao.get_prescriptions_by_patientID(self.current_account.accountID)
-        self.orders = self.orders_dao.get_orders_by_username(self.current_account.accountUsername)
+        
+        
         print('\nWould you like to make or modify an order? ')
         print('A. Make an order.')
         print('B. Modify an order.')

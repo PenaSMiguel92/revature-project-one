@@ -2,3 +2,4 @@ config/mysql_connection_vars.csv
 **/__pycache__/
 logs/prescription_store.log
 logs/rxbuddy_database.log
+~$P1Presentation_MiguelPena.pptx

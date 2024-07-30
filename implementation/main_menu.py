@@ -127,7 +127,6 @@ class MainMenu(InputValidation, MenuInterface):
     
     def patient_submenu(self) -> None:
         if self.patient_service == None:
-            print('Within patient submenu',self.account_service.current_account)
             self.patient_service = PatientService(self.account_service.current_account)
 
         if self.patient_service.get_state() == patient_service_state.CLOSING_STATE:
