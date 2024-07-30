@@ -109,9 +109,7 @@ class AccountDAO(DataAccessObjectInterface):
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
         roles = ['Admin', 'Patient', 'Doctor']
-        print(account.roleName)
         new_roleID = roles.index(account.roleName) + 1
-        print(new_roleID)
         cursor: MySQLCursor = super().get_cursor()
         query_start = f'UPDATE accounts SET balance={account.balance}, accountRole={new_roleID}'
         query_end = f' WHERE accountID={account.accountID};'
