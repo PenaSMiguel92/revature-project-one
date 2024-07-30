@@ -58,7 +58,7 @@ class AdminService(InputValidation, AdminServiceInterface):
                 print('A. Change role')
                 print('B. Delete account')
                 print('C. Exit')
-                submenu_option = input().upper()
+                submenu_option = input('>>>').upper()
                 if not self.validate_input(submenu_option, char_input=True, valid_input='ABC'):
                     raise AdminMenuSelectionInvalid('Please select a valid submenu option.')
                 break
@@ -72,7 +72,7 @@ class AdminService(InputValidation, AdminServiceInterface):
         while True:
             try: 
                 print('Select an account to modify (enter its ID): ')
-                user_input = input()
+                user_input = input('>>>')
                 if not self.validate_input(user_input, integer_input=True):
                     raise AdminMenuSelectionInvalid('Please select a valid account ID from the list.')
                 if int(user_input) not in valid_IDs:
