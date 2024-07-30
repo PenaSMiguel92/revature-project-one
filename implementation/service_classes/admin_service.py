@@ -92,6 +92,7 @@ class AdminService(InputValidation, AdminServiceInterface):
         return True
     
     def display_orders(self) -> None:
+        self.shop_orders = self.orders_dao.get_all_orders()
         print('\nThe following are all the orders in the database: ')
         # valid_IDs = set()
         result_str = ''
@@ -158,6 +159,7 @@ class AdminService(InputValidation, AdminServiceInterface):
         print('Medication added successfully.')
 
     def display_medications(self) -> None:
+        self.medications = self.medication_dao.get_all_medications()
         print('\nThe following are all the medications in the database: ')
         valid_IDs = set()
         result_str = ''
@@ -265,8 +267,6 @@ class AdminService(InputValidation, AdminServiceInterface):
         
     def display(self) -> None:
         self.accounts = self.account_dao.get_all_accounts()
-        self.medications = self.medication_dao.get_all_medications()
-        self.shop_orders = self.orders_dao.get_all_orders()
         print('\nWhat would you like to do? ')
         print('A. View all medications.')
         print('B. Modify or View accounts.')
