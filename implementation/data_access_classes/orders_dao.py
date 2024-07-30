@@ -61,18 +61,19 @@ class OrdersDAO(DataAccessObjectInterface):
         logging.info(f'The order with ID: {order_id} was retrieved successfully.')
         return order
     
-    def create_order(self, patient: Account, medication: Medication) -> bool:
+    def create_order(self, patient: Account, medication: Medication) -> Account:
         """
             This method will create an order and insert it into orders table for saving based on the patient account object and medication object.
 
             This method will return a boolean True value if transaction was successful, raise an exception otherwise.
         """
-        if patient.balance - medication.medicationCost < 0:
+        cur_balance = patient.balance
+        if cur_balance - medication.medicationCost < 0:
             return False
         
-        patient.balance -= medication.medicationCost
+        cur_balance -= medication.medicationCost
         cursor: MySQLCursor = super().get_cursor()
-        query_start = f'UPDATE accounts SET balance={patient.balance}, accountRole=2'
+        query_start = f'UPDATE accounts SET balance={cur_balance} '
         query_end = f' WHERE accountID={patient.accountID};'
         cursor.execute(query_start + query_end)
         query_start = 'INSERT INTO orders (orderID, accountID, medicationID) VALUES '
@@ -81,22 +82,23 @@ class OrdersDAO(DataAccessObjectInterface):
 
         super().commit_changes()
         logging.info(f'Created order for {patient.accountUsername} and saved to database.')
-        return True
+        return Account(patient.accountID, patient.accountUsername, patient.accountPassword, patient.firstName, patient.lastName, cur_balance, patient.roleName)
     
-    def create_orders_from_list(self, patient: Account, medication_list: list[Medication]) -> bool:
+    def create_orders_from_list(self, patient: Account, medication_list: list[Medication]) -> Account:
         """
             This method will generate an insert statement for multiple medications purchased
 
             It will also calculate balance while creating these reports.
         """
+        cur_balance = patient.balance
         stop_index = -1
         cursor: MySQLCursor = super().get_cursor()
         query = 'INSERT INTO orders (orderID, accountID, medicationID) VALUES '
         for index, medication in enumerate(medication_list):
-            if patient.balance - medication.medicationCost < 0:
+            if cur_balance - medication.medicationCost < 0:
                 stop_index = index
                 break
-            patient.balance -= medication.medicationCost
+            cur_balance -= medication.medicationCost
             if index == len(medication_list) - 1:
                 query += f'(DEFAULT, {patient.accountID}, {medication.medicationID});'
                 stop_index = index
@@ -109,12 +111,12 @@ class OrdersDAO(DataAccessObjectInterface):
             query = ''.join(query_list)
         cursor.execute(query)
 
-        query_start = f'UPDATE accounts SET balance={patient.balance}, accountRole=2'
+        query_start = f'UPDATE accounts SET balance={cur_balance} '
         query_end = f' WHERE accountID={patient.accountID};'
         cursor.execute(query_start + query_end)
         super().commit_changes()
         logging.info(f'Created order for {patient.accountUsername} and saved to database.')
-        return True
+        return Account(patient.accountID, patient.accountUsername, patient.accountPassword, patient.firstName, patient.lastName, cur_balance, patient.roleName)
 
     def delete_order_by_id(self, order_id: int) -> bool:
         """
@@ -131,7 +133,7 @@ class OrdersDAO(DataAccessObjectInterface):
             account_dao: AccountDAO = AccountDAO()
 
             patient: Account = account_dao.get_account_by_username(order.username)
-            patient.balance += order.totalAmount
+            patient.balance += order.medicationCost
             account_dao.update_account(patient)
             query = f'DELETE FROM orders WHERE orderID={order_id}'
             cursor.execute(query)
@@ -141,5 +143,5 @@ class OrdersDAO(DataAccessObjectInterface):
             return False
         
         super().commit_changes()
-        logging.info(f'Deleted order with ID: {order_id} from orders table and refunded ${order.totalAmount} to {patient.accountUsername} in database.')
+        logging.info(f'Deleted order with ID: {order_id} from orders table and refunded ${order.medicationCost} to {patient.accountUsername} in database.')
         return True  

@@ -134,12 +134,14 @@ class PatientService(InputValidation, PatientServiceInterface):
                 if one_or_more_invalid:
                     raise PatientMenuSelectionInvalid('One or more inputs were invalid, please make sure to input valid IDs.')
 
-                if self.orders_dao.create_orders_from_list(self.current_account, medication_list):
+                self.current_account = self.orders_dao.create_orders_from_list(self.current_account, medication_list)
+                if self.current_account:
                     break
             except PatientMenuSelectionInvalid as err:
                 print(err.message)
 
         print('Orders successfully submitted.')
+        print(f'\nYour balanace is now: {self.current_account.balance}')
         self.current_state = patient_service_state.INITIAL_STATE
         return True
     
