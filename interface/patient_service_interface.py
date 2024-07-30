@@ -9,18 +9,29 @@ class PatientServiceInterface(MenuBaseClass):
     @abstractmethod
     def get_state(self) -> int:
         ...
-    
+
     @abstractmethod
-    def display_orders(self) -> None:
+    def process_input(self, input: str) -> None:
         """
-            Displays all orders by this patient, and provides an interface for orders.
+            Change state based on user input.
         """
         ...
     
     @abstractmethod
-    def display_prescriptions(self) -> None:
+    def display_orders(self) -> bool:
+        """
+            Displays all orders by this patient, and provides an interface for orders.
+
+            Returns a boolean True value when user wants to log off from this submenu.
+        """
+        ...
+    
+    @abstractmethod
+    def display_prescriptions(self) -> bool:
         """
             Displays all prescribed medications to this patient, and provides an interface for purchasing and creating orders.
+
+            Returns a boolean True value when user wants to log off from this submenu.
         """
         ...
 

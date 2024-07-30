@@ -62,9 +62,40 @@ class MainMenu(InputValidation, MenuInterface):
     # Polymorphism allows me to repeat the same code for different objects that do different things.
 
     def account_submenu(self) -> None:
+        
         if self.account_service == None:
             self.account_service = AccountService()
         
+        if self.account_service.get_state() == account_service_state.CLOSING_STATE:
+            print('Are you sure you want to close the application? (Y/N)')
+            while True:
+                try:
+                    user_input = input('>>>').upper()
+                    if not self.validate_input(user_input, char_input = True, valid_input = 'YN'):
+                        raise MenuSelectionInvalidException("Please enter a valid menu option.")
+                    if user_input == 'Y':
+                        self.current_state = menu_state.CLOSING_STATE
+                    else:
+                        self.current_state = menu_state.INITIAL_STATE
+                        self.account_service.set_state(account_service_state.INITIAL_STATE)
+
+                    return
+                except MenuSelectionInvalidException as msg:
+                    print(msg.message)
+        
+        if self.account_service.get_state() == account_service_state.LOADED_USER_STATE:
+            self.account_service.account_greeting()
+            account_role = self.account_service.get_account_role()
+            match account_role:
+                case 'Admin':
+                    self.current_state = menu_state.ADMIN_SUBMENU_STATE
+                case 'Patient':
+                    self.current_state = menu_state.PATIENT_SUBMENU_STATE
+                case 'Doctor':
+                    self.current_state = menu_state.DOCTOR_SUBMENU_STATE
+
+            return
+
         if self.account_service.run(): #run should return True when everything goes well.
             self.reset_state()
 
@@ -95,35 +126,7 @@ class MainMenu(InputValidation, MenuInterface):
             print('\nWelcome to RXBuddy!')
             print('Please login or register...')
             return
-
-        if self.account_service.get_state() == account_service_state.CLOSING_STATE:
-            print('Are you sure you want to close the application? (Y/N)')
-            while True:
-                try:
-                    user_input = input('>>>').upper()
-                    if not self.validate_input(user_input, char_input = True, valid_input = 'YN'):
-                        raise MenuSelectionInvalidException("Please enter a valid menu option.")
-                    if user_input == 'Y':
-                        self.current_state = menu_state.CLOSING_STATE
-                    else:
-                        self.current_state = menu_state.INITIAL_STATE
-                        self.account_service.set_state(account_service_state.INITIAL_STATE)
-
-                    break
-                except MenuSelectionInvalidException as msg:
-                    print(msg.message)
         
-        if self.account_service.get_state() == account_service_state.LOADED_USER_STATE:
-            self.account_service.account_greeting()
-            account_role = self.account_service.get_account_role()
-            match account_role:
-                case 'Admin':
-                    self.current_state = menu_state.ADMIN_SUBMENU_STATE
-                case 'Patient':
-                    self.current_state = menu_state.PATIENT_SUBMENU_STATE
-                case 'Doctor':
-                    self.current_state = menu_state.DOCTOR_SUBMENU_STATE
-
     def run(self) -> None:
         match self.current_state:
             case menu_state.INITIAL_STATE:
