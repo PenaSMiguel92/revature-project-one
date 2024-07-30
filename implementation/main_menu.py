@@ -116,7 +116,7 @@ class MainMenu(InputValidation, MenuInterface):
                         self.admin_service = None
                     else:
                         self.current_state = menu_state.INITIAL_STATE
-                        self.patient_service.set_state(patient_service_state.INITIAL_STATE)
+                        self.admin_service.set_state(admin_service_state.INITIAL_STATE)
 
                     return
                 except MenuSelectionInvalidException as msg:
@@ -127,6 +127,7 @@ class MainMenu(InputValidation, MenuInterface):
     
     def patient_submenu(self) -> None:
         if self.patient_service == None:
+            print('Within patient submenu',self.account_service.current_account)
             self.patient_service = PatientService(self.account_service.current_account)
 
         if self.patient_service.get_state() == patient_service_state.CLOSING_STATE:
@@ -178,6 +179,16 @@ class MainMenu(InputValidation, MenuInterface):
 
         if self.doctor_service.run():
             self.reset_state()
+
+    def close_connections(self) -> None:
+        if self.account_service != None:
+            self.account_service.close_connections()
+        if self.admin_service != None:
+            self.admin_service.close_connections()
+        if self.doctor_service != None:
+            self.doctor_service.close_connections()
+        if self.patient_service != None:
+            self.patient_service.close_connections()
 
     def display(self) -> None:
         self.current_state = menu_state.ACCOUNT_SUBMENU_STATE

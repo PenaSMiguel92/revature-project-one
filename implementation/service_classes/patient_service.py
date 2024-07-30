@@ -23,6 +23,7 @@ patient_service_state = Enum('PATIENT_STATE', [
 
 class PatientService(InputValidation, PatientServiceInterface):
     def __init__(self, current_account: Account):
+        print('patient_service created with accountID: ', current_account.accountID)
         self.current_state = patient_service_state.INITIAL_STATE
         self.prescriptions_dao: PrescriptionDAO = PrescriptionDAO()
         self.orders_dao: OrdersDAO = OrdersDAO()
@@ -125,9 +126,21 @@ class PatientService(InputValidation, PatientServiceInterface):
             case 'C':
                 self.current_state = patient_service_state.CLOSING_STATE
 
+    def close_connections(self) -> bool:
+        """
+            This method closes connections if they exist.
+        """
+        if self.orders_dao.current_connection != None:
+            self.orders_dao.close_connection()
+        if self.medication_dao.current_connection != None:
+            self.medication_dao.close_connection()
+        if self.prescriptions_dao.current_connection != None:
+            self.prescriptions_dao.close_connection()
+        
+
     def display(self) -> bool:
-        self.prescriptions = self.prescriptions_dao.get_all_prescriptions()
-        self.orders = self.orders_dao.get_all_orders()
+        self.prescriptions = self.prescriptions_dao.get_prescriptions_by_patientID(self.current_account.accountID)
+        self.orders = self.orders_dao.get_orders_by_username(self.current_account.accountUsername)
         print('\nWould you like to make or modify an order? ')
         print('A. Make an order.')
         print('B. Modify an order.')

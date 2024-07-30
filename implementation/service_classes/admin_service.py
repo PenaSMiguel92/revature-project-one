@@ -28,9 +28,9 @@ class AdminService(InputValidation, AdminServiceInterface):
         self.medication_dao: MedicationDAO = MedicationDAO()
         self.orders_dao: OrdersDAO = OrdersDAO()
 
-        self.accounts: list[Account] = self.account_dao.get_all_accounts()
-        self.medications: list[Medication] = self.medication_dao.get_all_medications()
-        self.shop_orders: list[Shop_Order] = self.orders_dao.get_all_orders()
+        self.accounts: list[Account] = None
+        self.medications: list[Medication] = None
+        self.shop_orders: list[Shop_Order] = None
 
         self.current_account = current_account
 
@@ -183,8 +183,22 @@ class AdminService(InputValidation, AdminServiceInterface):
                 self.current_state = admin_service_state.ORDERS_STATE
             case 'D':
                 self.current_state = admin_service_state.CLOSING_STATE
+
+    def close_connections(self) -> bool:
+        """
+            This method closes connections if they exist.
+        """
+        if self.account_dao.current_connection != None:
+            self.account_dao.close_connection()
+        if self.medication_dao.current_connection != None:
+            self.medication_dao.close_connection()
+        if self.orders_dao.current_connection != None:
+            self.orders_dao.close_connection()
         
     def display(self) -> None:
+        self.accounts = self.account_dao.get_all_accounts()
+        self.medications = self.medication_dao.get_all_medications()
+        self.shop_orders = self.orders_dao.get_all_orders()
         print('\nWhat would you like to do? ')
         print('A. View all medications.')
         print('B. Modify or View accounts.')

@@ -55,3 +55,10 @@ class AdminServiceInterface(MenuBaseClass):
     @abstractmethod
     def process_input(self) -> None:
         ...
+
+    @abstractmethod
+    def close_connections(self) -> bool:
+        """
+            This method closes connections if they exist.
+        """
+        ...

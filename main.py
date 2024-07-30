@@ -18,6 +18,7 @@ def main() -> None:
             menu_object.run()
         except (MenuSelectionInvalidException) as e:
             print(e.message)
-    print("Closing tracker. Have a nice day :)")
+    menu_object.close_connections()
+    print("Closing RxBuddy... Have a nice day :)")
 if __name__ == "__main__":
     main()

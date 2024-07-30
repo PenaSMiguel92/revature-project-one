@@ -28,9 +28,9 @@ class DoctorService(InputValidation, DoctorServiceInterface):
         self.medication_dao: MedicationDAO = MedicationDAO()
         self.prescriptions_dao: PrescriptionDAO = PrescriptionDAO()
 
-        self.accounts: list[Account] = self.account_dao.get_all_patients()
-        self.medications: list[Medication] = self.medication_dao.get_all_medications()
-        self.prescriptions: list[Prescription] = self.prescriptions_dao.get_prescriptions_by_doctorID(current_account.accountID)
+        self.accounts: list[Account] = None 
+        self.medications: list[Medication] = None
+        self.prescriptions: list[Prescription] = None
 
         self.current_account = current_account
 
@@ -184,8 +184,22 @@ class DoctorService(InputValidation, DoctorServiceInterface):
                 self.current_state = doctor_service_state.MODFIY_MEDICATIONS_STATE
             case 'D':
                 self.current_state = doctor_service_state.CLOSING_STATE
+
+    def close_connections(self) -> bool:
+        """
+            This method closes connections if they exist.
+        """
+        if self.account_dao.current_connection != None:
+            self.account_dao.close_connection()
+        if self.medication_dao.current_connection != None:
+            self.medication_dao.close_connection()
+        if self.prescriptions_dao.current_connection != None:
+            self.prescriptions_dao.close_connection()
         
     def display(self) -> None:
+        self.accounts = self.account_dao.get_all_patients()
+        self.medications = self.medication_dao.get_all_medications()
+        self.prescriptions = self.prescriptions_dao.get_prescriptions_by_doctorID(self.current_account.accountID)
         print('\nWhat would you like to do? ')
         print('A. Prescribe a medication')
         print('B. View my patients')

@@ -179,6 +179,13 @@ class AccountService(InputValidation, AccountServiceInterface):
                 self.current_state = account_service_state.LOADING_USER_STATE
             case 'E':
                 self.current_state = account_service_state.CLOSING_STATE
+
+    def close_connections(self) -> bool:
+        """
+            This method closes connections if they exist.
+        """
+        if self.account_dao.current_connection != None:
+            self.account_dao.close_connection()
     
     def set_state(self, state: int) -> None:
         self.current_state = state

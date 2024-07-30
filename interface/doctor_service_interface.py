@@ -37,3 +37,10 @@ class DoctorServiceInterface(MenuBaseClass):
             Method for processing user input.
         """
         ...
+
+    @abstractmethod
+    def close_connections(self) -> bool:
+        """
+            This method closes connections if they exist.
+        """
+        ...

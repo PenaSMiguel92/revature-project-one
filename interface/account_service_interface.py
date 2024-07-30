@@ -49,3 +49,10 @@ class AccountServiceInterface(MenuBaseClass):
             Use this to get the account's current role.
         """
         ...
+
+    @abstractmethod
+    def close_connections(self) -> bool:
+        """
+            This method closes connections if they exist.
+        """
+        ...

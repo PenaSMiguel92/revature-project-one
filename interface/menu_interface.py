@@ -10,7 +10,7 @@ class MenuInterface(MenuBaseClass):
 
             :params: The enum menu_state holds the various valid program states.  
         """
-        pass
+        ...
 
     @abstractmethod
     def get_state(self) -> int:
@@ -20,32 +20,39 @@ class MenuInterface(MenuBaseClass):
             :params:
             :return: This will be an int associated with the enum menu_state
         """
-        pass
+        ...
 
     @abstractmethod
     def account_submenu(self) -> None:
         """
             Relay responsibility of handling user creation and login to another class.
         """
-        pass
+        ...
 
     @abstractmethod
     def admin_submenu(self) -> None:
         """
             Relay responsibility of handling admin menu to another class.
         """
-        pass
+        ...
 
     @abstractmethod
     def patient_submenu(self) -> None:
         """
             Relay responsibility of handling patient actions to another class.
         """
-        pass
+        ...
 
     @abstractmethod
     def doctor_submenu(self) -> None:
         """
             Relay responsibility of handling doctor actions to another class.
         """
-        pass
+        ...
+
+    @abstractmethod
+    def close_connections(self) -> None:
+        """
+            Close connections if they exist.
+        """
+        ...

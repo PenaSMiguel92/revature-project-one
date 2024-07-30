@@ -35,5 +35,10 @@ class PatientServiceInterface(MenuBaseClass):
         """
         ...
 
-
+    @abstractmethod
+    def close_connections(self) -> bool:
+        """
+            This method closes connections if they exist.
+        """
+        ...
     

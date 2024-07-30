@@ -31,9 +31,10 @@ class DataAccessObjectInterface(object):
             try:
                 class_pointer.current_cursor = class_pointer.current_connection.cursor()
             except (mysql.connector.ProgrammingError, ValueError) as mysql_error:
-                
+                logging.error(mysql_error.msg)
                 return
-        logging.info("Connected to database successfully.")
+            logging.info("Connected to database successfully.")
+        
         return class_pointer.current_cursor
     
     @classmethod
@@ -42,7 +43,7 @@ class DataAccessObjectInterface(object):
             Make sure to have a .csv file with user, password, host, and database columns in a directory called config/
             No quotes or spaces between.
         """
-        logging.info('Attempting to connect...')
+        
         try:
             filename = 'config/mysql_connection_vars.csv'
             with open(filename, 'r') as mysqlvars_file:
@@ -54,6 +55,7 @@ class DataAccessObjectInterface(object):
                     database_var = row[3]
             
             if class_pointer.current_connection == None:
+                logging.info('Attempting to connect...')
                 class_pointer.current_connection = mysql.connector.connect(user=user_var, password=pass_var, host=host_var, database=database_var)
             
         except IOError as error:
@@ -73,11 +75,16 @@ class DataAccessObjectInterface(object):
     @classmethod
     def commit_changes(class_pointer) -> None:
         class_pointer.current_connection.commit()
+        logging.info('Changes were commited to the database.')
 
     @classmethod
     def close_connection(class_pointer) -> bool:
-        class_pointer.current_cursor.close()
-        class_pointer.current_connection.close()
-        logging.info("Database connection closed. Changes commited.")
+        if class_pointer.current_cursor != None:
+            class_pointer.current_cursor.close()
+            class_pointer.current_cursor = None
+        if class_pointer.current_connection != None:
+            class_pointer.current_connection.close()
+            class_pointer.current_connection = None
+            logging.info("Database connection closed.")
         return True
     
